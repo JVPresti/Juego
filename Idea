@@ -1,6 +1,0 @@
-Juego de serpientes y escaleras con un total de 50 casillas, en el cual para avanzar debes lanzar 3 dados (dentro de la aplicacion)
-2 de esos dados daran como resultados numeros del 1 al 6, el dado restante dictaminara la operacion que se debe realizar, sera un dado de 4 caras (operaciones basicas suma, resta, multi, division)
-una vez obtenido eso, se procedera a realizar la operacion correspondiente, si la operacion fue resuelta de manera correcta, se avanzara la misma cantidad de casillas que el resultado obtenido
-en caso contrario, se retrocedera la respuesta correcta en casillas
-
-con un tiempo limite para responder la pregunta
