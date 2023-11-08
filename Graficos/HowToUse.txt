@@ -1,0 +1,1 @@
+usa mingw32-make.exe para compilarlo en la terminal, despues ve a la carpeta fuente y entra a build y ejecuta el exe
