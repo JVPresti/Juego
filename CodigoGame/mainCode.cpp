@@ -1,8 +1,11 @@
-#include "procesos.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #define TRUE 1
 #define FALSE 0
 #define TAM 35
 
+int validar(char msg[], int ri, int rf);
 int operacion();
 
 int main()
@@ -13,11 +16,11 @@ int main()
 
     do
     {
-        //TODO INICIA JUGADOR 1
+        // TODO INICIA JUGADOR 1
         system("cls");
         printf("\nJugador 1 \n");
         res = operacion();
-        band=FALSE;
+        band = FALSE;
         if (pos1 + res > TAM)
         {
             for (int i = res; pos1 <= TAM && i != 0; i--)
@@ -35,16 +38,16 @@ int main()
         }
         else
         {
-            pos2 += res;
+            pos1 += res;
         }
-        printf("Posicion %d", pos1);
+        printf("Posicion %d \n", pos1);
         system("pause");
 
-        //TODO INICIA JUGADOR 2
+        // TODO INICIA JUGADOR 2
         system("cls");
         printf("\n Jugador 2 \n");
         res = operacion();
-        band=FALSE;
+        band = FALSE;
         if (pos2 + res > TAM)
         {
             for (int i = res; pos2 <= TAM && i != 0; i--)
@@ -64,11 +67,23 @@ int main()
         {
             pos2 += res;
         }
-        printf("Posicion %d\n", pos2);
+        printf("Posicion %d \n", pos2);
         system("pause");
 
-
     } while (pos1 != fin || pos2 != fin);
+
+    if (pos1 >= fin && pos2 >= fin)
+    {
+        printf("Empate\n");
+    }
+    else if (pos1 >= fin)
+    {
+        printf("Jugador 1 gana\n");
+    }
+    else
+    {
+        printf("Jugador 2 gana\n");
+    }
 
     return 0;
 }
@@ -76,7 +91,7 @@ int main()
 //* 1. Suma
 //* 2. Resta
 //* 3. Multiplicaion
-//* 4. Division
+//*! 4. Division CUIDADO con los numeros decimales, probablemente no se pueda usar la division
 int operacion()
 {
     int n1, n2, oper, res;
@@ -84,15 +99,24 @@ int operacion()
     int res2;
     n1 = rand() % 6 + 1;
     n2 = rand() % 6 + 1;
-    oper = rand() % 4 + 1;
+    oper = rand() % 3 + 1;
 
-    if (n1 > n2 && oper == 4)
+    /*if (n1 > n2 && oper == 4)
     {
         do
         {
             n1 = rand() % 6 + 1;
             n2 = rand() % 6 + 1;
         } while (n1 > n2);
+    }*/
+
+    if (n2 > n1 && oper == 2)
+    {
+        do
+        {
+            n1 = rand() % 6 + 1;
+            n2 = rand() % 6 + 1;
+        } while (n2 > n1);
     }
 
     switch (oper)
@@ -109,16 +133,11 @@ int operacion()
         op = '*';
         res2 = n1 * n2;
         break;
-    case 4:
-        op = '/';
-        res2 = n1 / n2;
-        break;
     }
 
-
     printf("\n Resuelve la siguiente operacion: ");
-    printf("%d %c %d", n1, op, n2); //! Creo que essto me da error el caracter
-    res = validar(" ", 0, 100);
+    printf("%d %c %d", n1, op, n2);
+    res = validar(" = ", -100, 100);
 
     if (res == res2)
     {
@@ -128,4 +147,20 @@ int operacion()
     {
         return res2;
     }
+}
+
+int validar(char msg[], int ri, int rf)
+{
+    char cadena[50];
+    int op;
+
+    do
+    {
+        printf("%s", msg);
+        fflush(stdin);
+        gets(cadena);
+        op = atoi(cadena);        // Convierte la cadena a un numero
+    } while (op < ri || op > rf); // Valida que este dentro de los rangos
+
+    return op;
 }
