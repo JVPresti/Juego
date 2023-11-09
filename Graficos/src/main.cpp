@@ -1,196 +1,125 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <raylib.h>
+#include <string.h>
 
-#include "raylib.h"
-#include "rcamera.h"
+#define TRUE 1
+#define FALSE 0
+#define TAM 35
 
-#define MAX_COLUMNS 20
+int operacion();
 
-//------------------------------------------------------------------------------------
-// Program main entry point
-//------------------------------------------------------------------------------------
-int main(void)
+int main()
 {
-    // Initialization
-    //--------------------------------------------------------------------------------------
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    srand(time(NULL));
+    int res1, res2, band;
+    int pos1 = 0, pos2 = 0, fin = TAM;
+    int jugadorActual = 1;
+    char respuesta[3] = ""; // Almacenar la respuesta del jugador
+    int n1 = 0, n2 = 0;     // Números para la operación
 
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera first person");
+    const int screenWidth = GetMonitorWidth(0);   // Ancho de pantalla completa
+    const int screenHeight = GetMonitorHeight(0); // Alto de pantalla completa
 
-    // Define the camera to look into our 3d world (position, target, up vector)
-    Camera camera = {0};
-    camera.position = (Vector3){0.0f, 2.0f, 4.0f}; // Camera position
-    camera.target = (Vector3){0.0f, 2.0f, 0.0f};   // Camera looking at point
-    camera.up = (Vector3){0.0f, 1.0f, 0.0f};       // Camera up vector (rotation towards target)
-    camera.fovy = 60.0f;                           // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;        // Camera projection type
+    InitWindow(screenWidth, screenHeight, "Juego de Carrera");
+    ToggleFullscreen(); // Alternar a pantalla completa
 
-    int cameraMode = CAMERA_FIRST_PERSON;
+    SetTargetFPS(60);
 
-    // Generates some random columns
-    float heights[MAX_COLUMNS] = {0};
-    Vector3 positions[MAX_COLUMNS] = {0};
-    Color colors[MAX_COLUMNS] = {0};
+    // Cargar la imagen de fondo
+    Image background = LoadImage("board.png");
+    Texture2D backgroundTexture = LoadTextureFromImage(background);
+    UnloadImage(background);
 
-    for (int i = 0; i < MAX_COLUMNS; i++)
+    // Definir los botones numéricos
+    Rectangle numButtons[6];
+    for (int i = 0; i < 6; i++)
     {
-        heights[i] = (float)GetRandomValue(1, 12);
-        positions[i] = (Vector3){(float)GetRandomValue(-15, 15), heights[i] / 2.0f, (float)GetRandomValue(-15, 15)};
-        colors[i] = (Color){GetRandomValue(20, 255), GetRandomValue(10, 55), 30, 255};
+        numButtons[i].x = 10 + i * 100;
+        numButtons[i].y = screenHeight - 60;
+        numButtons[i].width = 80;
+        numButtons[i].height = 40;
     }
 
-    DisableCursor(); // Limit cursor to relative movement inside the window
-
-    SetTargetFPS(60); // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
-
-    // Main game loop
-    while (!WindowShouldClose()) // Detect window close button or ESC key
+    while (!WindowShouldClose() && (pos1 < fin || pos2 < fin))
     {
-        // Update
-        //----------------------------------------------------------------------------------
-        // Switch camera mode
-        if (IsKeyPressed(KEY_ONE))
+        // Generar operación y números aleatorios solo si no se ha generado una operación previamente
+        if (n1 == 0 && n2 == 0)
         {
-            cameraMode = CAMERA_FREE;
-            camera.up = (Vector3){0.0f, 1.0f, 0.0f}; // Reset roll
+            int oper = 1; // Solo suma en esta versión
+            n1 = rand() % 6 + 1;
+            n2 = rand() % 6 + 1;
+            res1 = n1 + n2;
         }
 
-        if (IsKeyPressed(KEY_TWO))
+        // Actualizar posición del jugador cuando se hace clic en un botón
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && (pos1 < fin || pos2 < fin))
         {
-            cameraMode = CAMERA_FIRST_PERSON;
-            camera.up = (Vector3){0.0f, 1.0f, 0.0f}; // Reset roll
-        }
-
-        if (IsKeyPressed(KEY_THREE))
-        {
-            cameraMode = CAMERA_THIRD_PERSON;
-            camera.up = (Vector3){0.0f, 1.0f, 0.0f}; // Reset roll
-        }
-
-        if (IsKeyPressed(KEY_FOUR))
-        {
-            cameraMode = CAMERA_ORBITAL;
-            camera.up = (Vector3){0.0f, 1.0f, 0.0f}; // Reset roll
-        }
-
-        // Switch camera projection
-        if (IsKeyPressed(KEY_P))
-        {
-            if (camera.projection == CAMERA_PERSPECTIVE)
+            Vector2 mousePosition = GetMousePosition();
+            for (int i = 0; i < 6; i++)
             {
-                // Create isometric view
-                cameraMode = CAMERA_THIRD_PERSON;
-                // Note: The target distance is related to the render distance in the orthographic projection
-                camera.position = (Vector3){0.0f, 2.0f, -100.0f};
-                camera.target = (Vector3){0.0f, 2.0f, 0.0f};
-                camera.up = (Vector3){0.0f, 1.0f, 0.0f};
-                camera.projection = CAMERA_ORTHOGRAPHIC;
-                camera.fovy = 20.0f; // near plane width in CAMERA_ORTHOGRAPHIC
-                CameraYaw(&camera, -135 * DEG2RAD, true);
-                CameraPitch(&camera, -45 * DEG2RAD, true, true, false);
-            }
-            else if (camera.projection == CAMERA_ORTHOGRAPHIC)
-            {
-                // Reset to default view
-                cameraMode = CAMERA_THIRD_PERSON;
-                camera.position = (Vector3){0.0f, 2.0f, 10.0f};
-                camera.target = (Vector3){0.0f, 2.0f, 0.0f};
-                camera.up = (Vector3){0.0f, 1.0f, 0.0f};
-                camera.projection = CAMERA_PERSPECTIVE;
-                camera.fovy = 60.0f;
+                if (CheckCollisionPointRec(mousePosition, numButtons[i]))
+                {
+                    // Agregar el número presionado a la respuesta
+                    if (strlen(respuesta) < 2)
+                    {
+                        respuesta[strlen(respuesta)] = '0' + i + 1;
+                    }
+                }
             }
         }
 
-        // Update camera computes movement internally depending on the camera mode
-        // Some default standard keyboard/mouse inputs are hardcoded to simplify use
-        // For advance camera controls, it's reecommended to compute camera movement manually
-        UpdateCamera(&camera, cameraMode); // Update camera
+        // Cambiar al siguiente jugador
+        if (IsKeyPressed(KEY_SPACE) && (pos1 < fin || pos2 < fin))
+        {
+            jugadorActual = (jugadorActual == 1) ? 2 : 1;
+            respuesta[0] = '\0'; // Borrar la respuesta
+        }
 
-        /*
-                // Camera PRO usage example (EXPERIMENTAL)
-                // This new camera function allows custom movement/rotation values to be directly provided
-                // as input parameters, with this approach, rcamera module is internally independent of raylib inputs
-                UpdateCameraPro(&camera,
-                    (Vector3){
-                        (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))*0.1f -      // Move forward-backward
-                        (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))*0.1f,
-                        (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))*0.1f -   // Move right-left
-                        (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))*0.1f,
-                        0.0f                                                // Move up-down
-                    },
-                    (Vector3){
-                        GetMouseDelta().x*0.05f,                            // Rotation: yaw
-                        GetMouseDelta().y*0.05f,                            // Rotation: pitch
-                        0.0f                                                // Rotation: roll
-                    },
-                    GetMouseWheelMove()*2.0f);                              // Move to target (zoom)
-        */
-        //----------------------------------------------------------------------------------
-
-        // Draw
-        //----------------------------------------------------------------------------------
+        // Dibuja la interfaz
         BeginDrawing();
 
-        ClearBackground(RAYWHITE);
+        // Dibujar la imagen de fondo
+        DrawTexture(backgroundTexture, 0, 0, RAYWHITE);
 
-        BeginMode3D(camera);
-
-        DrawPlane((Vector3){0.0f, 0.0f, 0.0f}, (Vector2){32.0f, 32.0f}, LIGHTGRAY); // Draw ground
-        DrawCube((Vector3){-16.0f, 2.5f, 0.0f}, 1.0f, 5.0f, 32.0f, BLUE);           // Draw a blue wall
-        DrawCube((Vector3){16.0f, 2.5f, 0.0f}, 1.0f, 5.0f, 32.0f, LIME);            // Draw a green wall
-        DrawCube((Vector3){0.0f, 2.5f, 16.0f}, 32.0f, 5.0f, 1.0f, GOLD);            // Draw a yellow wall
-
-        // Draw some cubes around
-        for (int i = 0; i < MAX_COLUMNS; i++)
+        Texture2D backgroundTexture = LoadTextureFromImage(background);
+        if (backgroundTexture.id == 0)
         {
-            DrawCube(positions[i], 2.0f, heights[i], 2.0f, colors[i]);
-            DrawCubeWires(positions[i], 2.0f, heights[i], 2.0f, MAROON);
+            // La carga de la imagen falló, muestra un mensaje de error o ajusta la ruta de la imagen.
+            // También verifica que la imagen esté en el formato correcto.
         }
 
-        // Draw player cube
-        if (cameraMode == CAMERA_THIRD_PERSON)
+        // Muestra las posiciones de ambos jugadores en el centro de la ventana
+        DrawText(TextFormat("Jugador 1: %d", pos1), screenWidth / 4, screenHeight / 4, 30, DARKGRAY);
+        DrawText(TextFormat("Jugador 2: %d", pos2), screenWidth * 3 / 4, screenHeight / 4, 30, DARKGRAY);
+
+        // Dibujar botones numéricos
+        for (int i = 0; i < 6; i++)
         {
-            DrawCube(camera.target, 0.5f, 0.5f, 0.5f, PURPLE);
-            DrawCubeWires(camera.target, 0.5f, 0.5f, 0.5f, DARKPURPLE);
+            DrawRectangleRec(numButtons[i], DARKGRAY);
+            DrawText(TextFormat("%d", i + 1), numButtons[i].x + 20, numButtons[i].y + 10, 20, RAYWHITE);
         }
 
-        EndMode3D();
+        // Mostrar campo de respuesta
+        DrawText("Respuesta:", screenWidth / 2 - 70, screenHeight - 100, 20, DARKGRAY);
+        DrawText(respuesta, screenWidth / 2 + 30, screenHeight - 100, 20, DARKGRAY);
 
-        // Draw info boxes
-        DrawRectangle(5, 5, 330, 100, Fade(SKYBLUE, 0.5f));
-        DrawRectangleLines(5, 5, 330, 100, BLUE);
-
-        DrawText("Camera controls:", 15, 15, 10, BLACK);
-        DrawText("- Move keys: W, A, S, D, Space, Left-Ctrl", 15, 30, 10, BLACK);
-        DrawText("- Look around: arrow keys or mouse", 15, 45, 10, BLACK);
-        DrawText("- Camera mode keys: 1, 2, 3, 4", 15, 60, 10, BLACK);
-        DrawText("- Zoom keys: num-plus, num-minus or mouse scroll", 15, 75, 10, BLACK);
-        DrawText("- Camera projection key: P", 15, 90, 10, BLACK);
-
-        DrawRectangle(600, 5, 195, 100, Fade(SKYBLUE, 0.5f));
-        DrawRectangleLines(600, 5, 195, 100, BLUE);
-
-        DrawText("Camera status:", 610, 15, 10, BLACK);
-        DrawText(TextFormat("- Mode: %s", (cameraMode == CAMERA_FREE) ? "FREE" : (cameraMode == CAMERA_FIRST_PERSON) ? "FIRST_PERSON"
-                                                                             : (cameraMode == CAMERA_THIRD_PERSON)   ? "THIRD_PERSON"
-                                                                             : (cameraMode == CAMERA_ORBITAL)        ? "ORBITAL"
-                                                                                                                     : "CUSTOM"),
-                 610, 30, 10, BLACK);
-        DrawText(TextFormat("- Projection: %s", (camera.projection == CAMERA_PERSPECTIVE) ? "PERSPECTIVE" : (camera.projection == CAMERA_ORTHOGRAPHIC) ? "ORTHOGRAPHIC"
-                                                                                                                                                       : "CUSTOM"),
-                 610, 45, 10, BLACK);
-        DrawText(TextFormat("- Position: (%06.3f, %06.3f, %06.3f)", camera.position.x, camera.position.y, camera.position.z), 610, 60, 10, BLACK);
-        DrawText(TextFormat("- Target: (%06.3f, %06.3f, %06.3f)", camera.target.x, camera.target.y, camera.target.z), 610, 75, 10, BLACK);
-        DrawText(TextFormat("- Up: (%06.3f, %06.3f, %06.3f)", camera.up.x, camera.up.y, camera.up.z), 610, 90, 10, BLACK);
+        // Mostrar operación en una línea separada
+        if (pos1 < fin && pos2 < fin)
+        {
+            DrawText("Operacion:", 10, screenHeight / 2, 20, DARKGRAY);
+            char operacionStr[50];
+            snprintf(operacionStr, sizeof(operacionStr), "%d + %d", n1, n2);
+            DrawText(operacionStr, 10, screenHeight / 2 + 30, 20, DARKGRAY);
+            DrawText("Presiona ESPACIO para avanzar al siguiente turno", 10, screenHeight / 2 + 60, 20, DARKGRAY);
+        }
 
         EndDrawing();
-        //----------------------------------------------------------------------------------
     }
 
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    CloseWindow(); // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
+    UnloadTexture(backgroundTexture); // Liberar la textura de la imagen de fondo
+    CloseWindow();
 
     return 0;
 }
