@@ -1,125 +1,294 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <raylib.h>
+#include "raylib.h"
 #include <string.h>
 
-#define TRUE 1
-#define FALSE 0
-#define TAM 35
+#if defined(PLATFORM_WEB)
+#include <emscripten/emscripten.h>
+#endif
 
-int operacion();
+//----------------------------------------------------------------------------------
+// Some Defines
+//----------------------------------------------------------------------------------
+#define SNAKE_LENGTH 256
+#define SQUARE_SIZE 20
 
-int main()
+//----------------------------------------------------------------------------------
+// Types and Structures Definition
+//----------------------------------------------------------------------------------
+typedef struct Snake
 {
-    srand(time(NULL));
-    int res1, res2, band;
-    int pos1 = 0, pos2 = 0, fin = TAM;
-    int jugadorActual = 1;
-    char respuesta[3] = ""; // Almacenar la respuesta del jugador
-    int n1 = 0, n2 = 0;     // Números para la operación
+    Vector2 position;
+    Vector2 size;
+    Vector2 speed;
+    Color color;
+} Snake;
 
-    const int screenWidth = GetMonitorWidth(0);   // Ancho de pantalla completa
-    const int screenHeight = GetMonitorHeight(0); // Alto de pantalla completa
+typedef struct Food
+{
+    Vector2 position;
+    Vector2 size;
+    bool active;
+    Color color;
+} Food;
 
-    InitWindow(screenWidth, screenHeight, "Juego de Carrera");
-    ToggleFullscreen(); // Alternar a pantalla completa
+//------------------------------------------------------------------------------------
+// Global Variables Declaration
+//------------------------------------------------------------------------------------
+static const int screenWidth = 800;
+static const int screenHeight = 450;
 
+static int framesCounter = 0;
+static bool gameOver = false;
+static bool pause = false;
+
+static Food fruit = {0};
+static Snake snake[SNAKE_LENGTH] = {0};
+static Vector2 snakePosition[SNAKE_LENGTH] = {0};
+static bool allowMove = false;
+static Vector2 offset = {0};
+static int counterTail = 0;
+
+// Texture for background
+static Texture2D background;
+
+//------------------------------------------------------------------------------------
+// Module Functions Declaration (local)
+//------------------------------------------------------------------------------------
+static void InitGame(void);        // Initialize game
+static void UpdateGame(void);      // Update game (one frame)
+static void DrawGame(void);        // Draw game (one frame)
+static void UnloadGame(void);      // Unload game
+static void UpdateDrawFrame(void); // Update and Draw (one frame)
+
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+int main(void)
+{
+    // Initialization (Note windowTitle is unused on Android)
+    //---------------------------------------------------------
+    InitWindow(screenWidth, screenHeight, "classic game: snake");
+    // Load background image
+    // Load background image with correct format
+    // Load background image with correct format
+    background = LoadTexture("C:\\Users\\nanoj\\OneDrive\\Escritorio\\snakefondo2.png");
+
+    InitGame();
+
+#if defined(PLATFORM_WEB)
+    emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
+#else
     SetTargetFPS(60);
+    //--------------------------------------------------------------------------------------
 
-    // Cargar la imagen de fondo
-    Image background = LoadImage("board.png");
-    Texture2D backgroundTexture = LoadTextureFromImage(background);
-    UnloadImage(background);
-
-    // Definir los botones numéricos
-    Rectangle numButtons[6];
-    for (int i = 0; i < 6; i++)
+    // Main game loop
+    while (!WindowShouldClose()) // Detect window close button or ESC key
     {
-        numButtons[i].x = 10 + i * 100;
-        numButtons[i].y = screenHeight - 60;
-        numButtons[i].width = 80;
-        numButtons[i].height = 40;
+        // Update and Draw
+        //----------------------------------------------------------------------------------
+        UpdateDrawFrame();
+        //----------------------------------------------------------------------------------
+    }
+#endif
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadGame(); // Unload loaded data (textures, sounds, models...)
+
+    CloseWindow(); // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
+
+    return 0;
+}
+
+//------------------------------------------------------------------------------------
+// Module Functions Definitions (local)
+//------------------------------------------------------------------------------------
+
+// Initialize game variables
+void InitGame(void)
+{
+    framesCounter = 0;
+    gameOver = false;
+    pause = false;
+
+    counterTail = 1;
+    allowMove = false;
+
+    offset.x = screenWidth % SQUARE_SIZE;
+    offset.y = screenHeight % SQUARE_SIZE;
+
+    for (int i = 0; i < SNAKE_LENGTH; i++)
+    {
+        snake[i].position = (Vector2){offset.x / 2, offset.y / 2};
+        snake[i].size = (Vector2){SQUARE_SIZE, SQUARE_SIZE};
+        snake[i].speed = (Vector2){SQUARE_SIZE, 0};
+
+        if (i == 0)
+            snake[i].color = DARKBLUE;
+        else
+            snake[i].color = BLUE;
     }
 
-    while (!WindowShouldClose() && (pos1 < fin || pos2 < fin))
+    for (int i = 0; i < SNAKE_LENGTH; i++)
     {
-        // Generar operación y números aleatorios solo si no se ha generado una operación previamente
-        if (n1 == 0 && n2 == 0)
-        {
-            int oper = 1; // Solo suma en esta versión
-            n1 = rand() % 6 + 1;
-            n2 = rand() % 6 + 1;
-            res1 = n1 + n2;
-        }
+        snakePosition[i] = (Vector2){0.0f, 0.0f};
+    }
 
-        // Actualizar posición del jugador cuando se hace clic en un botón
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && (pos1 < fin || pos2 < fin))
+    fruit.size = (Vector2){SQUARE_SIZE, SQUARE_SIZE};
+    fruit.color = SKYBLUE;
+    fruit.active = false;
+}
+
+// Update game (one frame)
+void UpdateGame(void)
+{
+    if (!gameOver)
+    {
+        if (IsKeyPressed('P'))
+            pause = !pause;
+
+        if (!pause)
         {
-            Vector2 mousePosition = GetMousePosition();
-            for (int i = 0; i < 6; i++)
+            // Player control
+            if (IsKeyPressed(KEY_RIGHT) && (snake[0].speed.x == 0) && allowMove)
             {
-                if (CheckCollisionPointRec(mousePosition, numButtons[i]))
+                snake[0].speed = (Vector2){SQUARE_SIZE, 0};
+                allowMove = false;
+            }
+            if (IsKeyPressed(KEY_LEFT) && (snake[0].speed.x == 0) && allowMove)
+            {
+                snake[0].speed = (Vector2){-SQUARE_SIZE, 0};
+                allowMove = false;
+            }
+            if (IsKeyPressed(KEY_UP) && (snake[0].speed.y == 0) && allowMove)
+            {
+                snake[0].speed = (Vector2){0, -SQUARE_SIZE};
+                allowMove = false;
+            }
+            if (IsKeyPressed(KEY_DOWN) && (snake[0].speed.y == 0) && allowMove)
+            {
+                snake[0].speed = (Vector2){0, SQUARE_SIZE};
+                allowMove = false;
+            }
+
+            // Snake movement
+            for (int i = 0; i < counterTail; i++)
+                snakePosition[i] = snake[i].position;
+
+            if ((framesCounter % 5) == 0)
+            {
+                for (int i = 0; i < counterTail; i++)
                 {
-                    // Agregar el número presionado a la respuesta
-                    if (strlen(respuesta) < 2)
+                    if (i == 0)
                     {
-                        respuesta[strlen(respuesta)] = '0' + i + 1;
+                        snake[0].position.x += snake[0].speed.x;
+                        snake[0].position.y += snake[0].speed.y;
+                        allowMove = true;
+                    }
+                    else
+                        snake[i].position = snakePosition[i - 1];
+                }
+            }
+
+            // Wall behaviour
+            if (((snake[0].position.x) > (screenWidth - offset.x)) ||
+                ((snake[0].position.y) > (screenHeight - offset.y)) ||
+                (snake[0].position.x < 0) || (snake[0].position.y < 0))
+            {
+                gameOver = true;
+            }
+
+            // Collision with yourself
+            for (int i = 1; i < counterTail; i++)
+            {
+                if ((snake[0].position.x == snake[i].position.x) && (snake[0].position.y == snake[i].position.y))
+                    gameOver = true;
+            }
+
+            // Fruit position calculation
+            if (!fruit.active)
+            {
+                fruit.active = true;
+                fruit.position = (Vector2){GetRandomValue(0, (screenWidth / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.x / 2, GetRandomValue(0, (screenHeight / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.y / 2};
+
+                for (int i = 0; i < counterTail; i++)
+                {
+                    while ((fruit.position.x == snake[i].position.x) && (fruit.position.y == snake[i].position.y))
+                    {
+                        fruit.position = (Vector2){GetRandomValue(0, (screenWidth / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.x / 2, GetRandomValue(0, (screenHeight / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.y / 2};
+                        i = 0;
                     }
                 }
             }
+
+            // Collision
+            if ((snake[0].position.x < (fruit.position.x + fruit.size.x) && (snake[0].position.x + snake[0].size.x) > fruit.position.x) &&
+                (snake[0].position.y < (fruit.position.y + fruit.size.y) && (snake[0].position.y + snake[0].size.y) > fruit.position.y))
+            {
+                snake[counterTail].position = snakePosition[counterTail - 1];
+                counterTail += 1;
+                fruit.active = false;
+            }
+
+            framesCounter++;
         }
-
-        // Cambiar al siguiente jugador
-        if (IsKeyPressed(KEY_SPACE) && (pos1 < fin || pos2 < fin))
-        {
-            jugadorActual = (jugadorActual == 1) ? 2 : 1;
-            respuesta[0] = '\0'; // Borrar la respuesta
-        }
-
-        // Dibuja la interfaz
-        BeginDrawing();
-
-        // Dibujar la imagen de fondo
-        DrawTexture(backgroundTexture, 0, 0, RAYWHITE);
-
-        Texture2D backgroundTexture = LoadTextureFromImage(background);
-        if (backgroundTexture.id == 0)
-        {
-            // La carga de la imagen falló, muestra un mensaje de error o ajusta la ruta de la imagen.
-            // También verifica que la imagen esté en el formato correcto.
-        }
-
-        // Muestra las posiciones de ambos jugadores en el centro de la ventana
-        DrawText(TextFormat("Jugador 1: %d", pos1), screenWidth / 4, screenHeight / 4, 30, DARKGRAY);
-        DrawText(TextFormat("Jugador 2: %d", pos2), screenWidth * 3 / 4, screenHeight / 4, 30, DARKGRAY);
-
-        // Dibujar botones numéricos
-        for (int i = 0; i < 6; i++)
-        {
-            DrawRectangleRec(numButtons[i], DARKGRAY);
-            DrawText(TextFormat("%d", i + 1), numButtons[i].x + 20, numButtons[i].y + 10, 20, RAYWHITE);
-        }
-
-        // Mostrar campo de respuesta
-        DrawText("Respuesta:", screenWidth / 2 - 70, screenHeight - 100, 20, DARKGRAY);
-        DrawText(respuesta, screenWidth / 2 + 30, screenHeight - 100, 20, DARKGRAY);
-
-        // Mostrar operación en una línea separada
-        if (pos1 < fin && pos2 < fin)
-        {
-            DrawText("Operacion:", 10, screenHeight / 2, 20, DARKGRAY);
-            char operacionStr[50];
-            snprintf(operacionStr, sizeof(operacionStr), "%d + %d", n1, n2);
-            DrawText(operacionStr, 10, screenHeight / 2 + 30, 20, DARKGRAY);
-            DrawText("Presiona ESPACIO para avanzar al siguiente turno", 10, screenHeight / 2 + 60, 20, DARKGRAY);
-        }
-
-        EndDrawing();
     }
+    else
+    {
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            InitGame();
+            gameOver = false;
+        }
+    }
+}
 
-    UnloadTexture(backgroundTexture); // Liberar la textura de la imagen de fondo
-    CloseWindow();
+// Draw game (one frame)
+void DrawGame(void)
+{
+    BeginDrawing();
 
-    return 0;
+    // Draw background image
+    DrawTexture(background, 0, 0, RAYWHITE);
+
+    if (!gameOver)
+    {
+        // Draw grid lines
+        for (int i = 0; i < screenWidth / SQUARE_SIZE + 1; i++)
+        {
+            DrawLineV((Vector2){SQUARE_SIZE * i + offset.x / 2, offset.y / 2}, (Vector2){SQUARE_SIZE * i + offset.x / 2, screenHeight - offset.y / 2}, LIGHTGRAY);
+        }
+
+        for (int i = 0; i < screenHeight / SQUARE_SIZE + 1; i++)
+        {
+            DrawLineV((Vector2){offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, (Vector2){screenWidth - offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, LIGHTGRAY);
+        }
+
+        // Draw snake
+        for (int i = 0; i < counterTail; i++)
+            DrawRectangleV(snake[i].position, snake[i].size, snake[i].color);
+
+        // Draw fruit to pick
+        DrawRectangleV(fruit.position, fruit.size, fruit.color);
+
+        if (pause)
+            DrawText("GAME PAUSED", screenWidth / 2 - MeasureText("GAME PAUSED", 40) / 2, screenHeight / 2 - 40, 40, GRAY);
+    }
+    else
+        DrawText("PRESS [ENTER] TO PLAY AGAIN", GetScreenWidth() / 2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20) / 2, GetScreenHeight() / 2 - 50, 20, GRAY);
+
+    EndDrawing();
+}
+
+// Unload game variables
+void UnloadGame(void)
+{
+    // Unload background image
+    UnloadTexture(background);
+}
+
+// Update and Draw (one frame)
+void UpdateDrawFrame(void)
+{
+    UpdateGame();
+    DrawGame();
 }
