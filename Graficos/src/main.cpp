@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include <string.h>
+#include <stdio.h>
 
 #if defined(PLATFORM_WEB)
 #include <emscripten/emscripten.h>
@@ -9,7 +10,7 @@
 // Some Defines
 //----------------------------------------------------------------------------------
 #define SNAKE_LENGTH 256
-#define SQUARE_SIZE 20
+#define SQUARE_SIZE 30
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
@@ -174,7 +175,7 @@ void UpdateGame(void)
             for (int i = 0; i < counterTail; i++)
                 snakePosition[i] = snake[i].position;
 
-            if ((framesCounter % 5) == 0)
+            if ((framesCounter % 14) == 0)
             {
                 for (int i = 0; i < counterTail; i++)
                 {
@@ -245,6 +246,9 @@ void UpdateGame(void)
 // Draw game (one frame)
 void DrawGame(void)
 {
+    // Declara numberText al principio de la función
+    char numberText[5];
+
     BeginDrawing();
 
     // Draw background image
@@ -255,20 +259,38 @@ void DrawGame(void)
         // Draw grid lines
         for (int i = 0; i < screenWidth / SQUARE_SIZE + 1; i++)
         {
-            DrawLineV((Vector2){SQUARE_SIZE * i + offset.x / 2, offset.y / 2}, (Vector2){SQUARE_SIZE * i + offset.x / 2, screenHeight - offset.y / 2}, LIGHTGRAY);
+            DrawLineV((Vector2){SQUARE_SIZE * i + offset.x / 2, offset.y / 2}, (Vector2){SQUARE_SIZE * i + offset.x / 2, screenHeight - offset.y / 2}, DARKGREEN);
         }
 
         for (int i = 0; i < screenHeight / SQUARE_SIZE + 1; i++)
         {
-            DrawLineV((Vector2){offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, (Vector2){screenWidth - offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, LIGHTGRAY);
+            DrawLineV((Vector2){offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, (Vector2){screenWidth - offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, DARKGREEN);
         }
 
         // Draw snake
         for (int i = 0; i < counterTail; i++)
             DrawRectangleV(snake[i].position, snake[i].size, snake[i].color);
 
-        // Draw fruit to pick
-        DrawRectangleV(fruit.position, fruit.size, fruit.color);
+        // Fruit position calculation
+        if (!fruit.active)
+        {
+            fruit.active = true;
+
+            // Genera un número aleatorio entre 1 y 20
+            int randomNumber = GetRandomValue(1, 20);
+
+            // Convierte el número a una cadena de caracteres
+            sprintf(numberText, "%d", randomNumber);
+
+            // Asigna una nueva posición a la fruta
+            fruit.position = (Vector2){GetRandomValue(0, (screenWidth / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.x / 2, GetRandomValue(0, (screenHeight / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.y / 2};
+        }
+
+        // Dibuja un cuadro azul en la posición de la fruta
+        DrawRectangleV(fruit.position, fruit.size, BLUE);
+
+        // Muestra el número sobre el cuadro azul
+        DrawText(numberText, fruit.position.x + fruit.size.x / 2 - MeasureText(numberText, 20) / 2, fruit.position.y + fruit.size.y / 2 - 10, 20, RED);
 
         if (pause)
             DrawText("GAME PAUSED", screenWidth / 2 - MeasureText("GAME PAUSED", 40) / 2, screenHeight / 2 - 40, 40, GRAY);
