@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #if defined(PLATFORM_WEB)
 #include <emscripten/emscripten.h>
@@ -55,8 +56,12 @@ bool fruitCollected = false;
 int collected = 0;
 char numberText[5];
 int fruitsEaten = 0;
+static int currentNumber = 0;
+static bool numberSelected = false;
+static int firstNumber = 0;
+static int secondNumber = 0;
 
-Music backgroundMusic;
+// Music backgroundMusic;
 
 // Textura para el fondo del juego
 static Texture2D backgroundGame;
@@ -85,6 +90,8 @@ static void UpdateDrawFrame(void); // Actualiza y dibuja (un frame)
 static void DrawMenu(void);        // Dibuja el menú
 static void UpdateMenu(void);      // Actualiza el menú
 void ResetGame(void);              // Reinicia el juego
+void HandleCalculatorInput();      // Maneja la entrada de la calculadora
+void DrawCalculatorButtons();      // Dibuja los botones de la calculadora
 Font font;
 //------------------------------------------------------------------------------------
 // Punto de entrada principal del programa
@@ -286,6 +293,10 @@ void UpdateGame(void)
                 {
                     char operations[] = {'+', 'x'};
                     fruit.operation = operations[GetRandomValue(0, 1)];
+
+                    // Almacena los dos números comidos
+                    firstNumber = atoi(numberText);
+                    secondNumber = GetRandomValue(1, 20);
                 }
             }
             framesCounter++;
@@ -390,7 +401,7 @@ void UnloadGame(void)
     // Descarga las texturas de fondo
     UnloadTexture(backgroundGame);
     UnloadTexture(backgroundMenu);
-    UnloadMusicStream(backgroundMusic);
+    // UnloadMusicStream(backgroundMusic);
     UnloadFont(font);
 }
 
@@ -445,6 +456,9 @@ void UpdateDrawFrame(void)
         // Dibuja el mensaje de pausa en la nueva ventana
         DrawText("Juego en pausa", screenWidth / 2 - MeasureText("Juego en pausa", 40) / 2, screenHeight / 2 - 40, 40, GRAY);
         DrawText("Presiona [ENTER] para continuar", screenWidth / 2 - MeasureText("Presiona [ENTER] para continuar", 20) / 2, screenHeight / 2, 20, GRAY);
+        DrawText(TextFormat("Números comidos: %d, %d", firstNumber, secondNumber), screenWidth / 2 - MeasureText("Números comidos: 00, 00", 20) / 2, screenHeight / 2 + 30, 20, GRAY);
+
+        DrawCalculatorButtons();
 
         EndDrawing();
 
@@ -453,6 +467,9 @@ void UpdateDrawFrame(void)
             pause = false;
             gameState = GAME; // Vuelve al juego
         }
+
+        // Maneja la entrada de la calculadora
+        HandleCalculatorInput();
     }
 }
 
@@ -532,4 +549,40 @@ void ResetGame(void)
     menuFadeOut = false;
     menuAlpha = 1.0f;
     selectedOption = 0;
+}
+
+void DrawCalculatorButtons()
+{
+    int buttonWidth = 50;
+    int buttonHeight = 50;
+    int margin = 10;
+    int startX = screenWidth / 2 - (9.5 * (buttonWidth + margin)) / 2;
+    int startY = screenHeight / 2 + 50;
+
+    for (int i = 0; i < 10; i++)
+    {
+        DrawRectangle(startX + i * (buttonWidth + margin), startY, buttonWidth, buttonHeight, GRAY);
+        DrawText(TextFormat("%d", i), startX + i * (buttonWidth + margin) + buttonWidth / 2 - MeasureText(TextFormat("%d", i), 20) / 2, startY + buttonHeight / 2 - 10, 20, BLACK);
+    }
+}
+
+void HandleCalculatorInput()
+{
+    int buttonWidth = 50;
+    int buttonHeight = 50;
+    int margin = 10;
+    int startX = screenWidth / 2 - (5 * (buttonWidth + margin)) / 2;
+    int startY = screenHeight / 2 + 50;
+
+    // Verifica clics en los botones de la calculadora
+    for (int i = 0; i < 10; i++)
+    {
+        Rectangle buttonRect = {startX + i * (buttonWidth + margin), startY, buttonWidth, buttonHeight};
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(GetMousePosition(), buttonRect))
+        {
+            // Realiza la operación correspondiente (puedes ajustar esto según tus necesidades)
+            currentNumber = i;
+            numberSelected = true;
+        }
+    }
 }
