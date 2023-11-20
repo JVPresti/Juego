@@ -54,6 +54,7 @@ int selectedOption = 0;
 bool fruitCollected = false;
 int collected = 0;
 char numberText[5];
+int fruitsEaten = 0;
 
 Music backgroundMusic;
 
@@ -67,7 +68,8 @@ static Texture2D backgroundMenu;
 typedef enum
 {
     MENU,
-    GAME
+    GAME,
+    PAUSED
 } GameState;
 
 static GameState gameState = MENU;
@@ -265,6 +267,19 @@ void UpdateGame(void)
                 counterTail += 1;
                 fruit.active = false;
                 fruitCollected = true;
+                fruitsEaten += 1;
+
+                if (fruitsEaten == 2)
+                {
+                    pause = true;
+                    gameState = PAUSED; // Cambia el estado del juego a pausado
+                }
+
+                // Restablece el contador después de dos frutas comidas
+                if (fruitsEaten == 2)
+                {
+                    fruitsEaten = 0;
+                }
 
                 // Aumentar el contador y asignar un nuevo signo cada dos frutas recolectadas
                 if (fruitCollected && (counterTail % 2 == 0))
@@ -335,7 +350,7 @@ void DrawGame(void)
 
                 // Muestra el mensaje con el signo aleatorio en pantalla
                 sprintf(operationText, "La operacion a resolver es una %c", fruit.operation);
-                DrawText(operationText, 10, 10, 20, RED);
+                DrawText(operationText, screenWidth - 200, 10, 20, RED);
             }
             else
             {
@@ -344,6 +359,7 @@ void DrawGame(void)
                 sprintf(numberText, "%d", randomNumber);
                 fruit.operation = ' '; // Espacio indica que es una fruta con número
             }
+            printf("Mensaje de operación: %s\n", operationText);
         }
 
         // Dibuja un cuadro azul en la posición de la fruta
@@ -419,6 +435,23 @@ void UpdateDrawFrame(void)
             gameState = GAME;
             fruitCollected = false; // Asegúrate de reiniciar la variable para la próxima vez
             ResetGame();
+        }
+    }
+    else if (gameState == PAUSED)
+    {
+        BeginDrawing();
+        ClearBackground(BLACK);
+
+        // Dibuja el mensaje de pausa en la nueva ventana
+        DrawText("Juego en pausa", screenWidth / 2 - MeasureText("Juego en pausa", 40) / 2, screenHeight / 2 - 40, 40, GRAY);
+        DrawText("Presiona [ENTER] para continuar", screenWidth / 2 - MeasureText("Presiona [ENTER] para continuar", 20) / 2, screenHeight / 2, 20, GRAY);
+
+        EndDrawing();
+
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            pause = false;
+            gameState = GAME; // Vuelve al juego
         }
     }
 }
