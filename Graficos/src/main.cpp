@@ -28,7 +28,7 @@ typedef struct Food
     Vector2 position;
     Vector2 size;
     bool active;
-    bool operation;
+    char operation;
     Color color;
 } Food;
 
@@ -52,6 +52,8 @@ static float menuAlpha = 1.0f;
 static bool menuFadeOut = false;
 int selectedOption = 0;
 bool fruitCollected = false;
+int collected = 0;
+char numberText[5];
 
 Music backgroundMusic;
 
@@ -164,7 +166,6 @@ void InitGame(void)
 // Actualiza el juego (un frame)
 void UpdateGame(void)
 {
-    int fruitCollected = 0;
     if (!gameOver)
     {
         if (IsKeyPressed('P'))
@@ -233,15 +234,27 @@ void UpdateGame(void)
             if (!fruit.active)
             {
                 fruit.active = true;
+                int randomNumber = GetRandomValue(1, 20);
+                sprintf(numberText, "%d", randomNumber);
                 fruit.position = (Vector2){GetRandomValue(0, (screenWidth / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.x / 2, GetRandomValue(0, (screenHeight / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.y / 2};
 
-                for (int i = 0; i < counterTail; i++)
+                if (collected == 2)
                 {
-                    while ((fruit.position.x == snake[i].position.x) && (fruit.position.y == snake[i].position.y))
-                    {
-                        fruit.position = (Vector2){GetRandomValue(0, (screenWidth / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.x / 2, GetRandomValue(0, (screenHeight / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.y / 2};
-                        i = 0;
-                    }
+                    // Genera frutas con operaciones
+                    char operations[] = {'+', 'x'};
+                    fruit.operation = operations[GetRandomValue(0, 1)];
+
+                    // Muestra el mensaje con el signo aleatorio en pantalla
+                    char operationText[30];
+                    sprintf(operationText, "La operacion a resolver es una %c", fruit.operation);
+                    DrawText(operationText, 10, 10, 20, RED);
+                }
+                else
+                {
+                    // Genera frutas con números
+                    randomNumber = GetRandomValue(1, 20);
+                    sprintf(numberText, "%d", randomNumber);
+                    fruit.operation = ' '; // Espacio indica que es una fruta con número
                 }
             }
 
@@ -252,8 +265,14 @@ void UpdateGame(void)
                 counterTail += 1;
                 fruit.active = false;
                 fruitCollected = true;
-            }
 
+                // Aumentar el contador y asignar un nuevo signo cada dos frutas recolectadas
+                if (fruitCollected && (counterTail % 2 == 0))
+                {
+                    char operations[] = {'+', 'x'};
+                    fruit.operation = operations[GetRandomValue(0, 1)];
+                }
+            }
             framesCounter++;
         }
     }
@@ -276,6 +295,7 @@ void UpdateGame(void)
 void DrawGame(void)
 {
     char numberText[5];
+    char operationText[30];
     Vector2 bkPosition = {0.0f, 0.0f};
     BeginDrawing();
 
@@ -306,6 +326,24 @@ void DrawGame(void)
             int randomNumber = GetRandomValue(1, 20);
             sprintf(numberText, "%d", randomNumber);
             fruit.position = (Vector2){GetRandomValue(0, (screenWidth / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.x / 2, GetRandomValue(0, (screenHeight / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.y / 2};
+
+            if (collected == 2)
+            {
+                // Genera frutas con operaciones
+                char operations[] = {'+', 'x'};
+                fruit.operation = operations[GetRandomValue(0, 1)];
+
+                // Muestra el mensaje con el signo aleatorio en pantalla
+                sprintf(operationText, "La operacion a resolver es una %c", fruit.operation);
+                DrawText(operationText, 10, 10, 20, RED);
+            }
+            else
+            {
+                // Genera frutas con números
+                randomNumber = GetRandomValue(1, 20);
+                sprintf(numberText, "%d", randomNumber);
+                fruit.operation = ' '; // Espacio indica que es una fruta con número
+            }
         }
 
         // Dibuja un cuadro azul en la posición de la fruta
@@ -313,6 +351,13 @@ void DrawGame(void)
 
         // Muestra el número sobre el cuadro azul
         DrawText(numberText, fruit.position.x + fruit.size.x / 2 - MeasureText(numberText, 20) / 2, fruit.position.y + fruit.size.y / 2 - 10, 20, RED);
+
+        // Muestra el signo en la esquina superior derecha
+        if (fruitCollected)
+        {
+            char operationText[2] = {fruit.operation, '\0'};
+            DrawText(operationText, screenWidth - MeasureText(operationText, 20) - 10, 10, 20, RED);
+        }
 
         if (pause)
             DrawText("PAUSA", screenWidth / 2 - MeasureText("PAUSA", 40) / 2, screenHeight / 2 - 40, 40, GRAY);
