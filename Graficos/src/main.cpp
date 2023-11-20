@@ -67,7 +67,7 @@ int main(void)
 {
     // Initialization (Note windowTitle is unused on Android)
     //---------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "classic game: snake");
+    InitWindow(screenWidth, screenHeight, "snake");
     // Load background image
     // Load background image with correct format
     // Load background image with correct format
@@ -248,11 +248,11 @@ void DrawGame(void)
 {
     // Declara numberText al principio de la función
     char numberText[5];
-
+    Vector2 bkPosition = {0.0f, 0.0f};
     BeginDrawing();
 
     // Draw background image
-    DrawTexture(background, 0, 0, RAYWHITE);
+    DrawTextureEx(background, bkPosition, 0, 0.62, RAYWHITE);
 
     if (!gameOver)
     {
