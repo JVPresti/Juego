@@ -101,7 +101,7 @@ int main(void)
     // Inicialización (windowTitle no se usa en Android)
     //---------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "Serpent Snake");
-
+    int jorge=10;
     // Cargar imágenes de fondo
     backgroundGame = LoadTexture("C:\\Users\\nanoj\\OneDrive\\Escritorio\\snakefondo2.png");
     backgroundMenu = LoadTexture("C:\\Users\\nanoj\\OneDrive\\Escritorio\\fondo.png");
