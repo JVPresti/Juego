@@ -367,7 +367,7 @@ void DrawGame(void)
         }
 
         // Dibuja un cuadro azul en la posición de la fruta
-        DrawRectangleV(fruit.position, fruit.size, RED);
+        DrawRectangleV(fruit.position, fruit.size, WHITE);
 
         // Muestra el número sobre el cuadro azul
         DrawText(numberText, fruit.position.x + fruit.size.x / 2 - MeasureText(numberText, 20) / 2, fruit.position.y + fruit.size.y / 2 - 10, 20, WHITE);
