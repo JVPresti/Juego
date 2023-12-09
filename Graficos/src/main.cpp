@@ -565,6 +565,18 @@ void RunCalculatorWindow(void)
         // Dibujar la respuesta del usuario
         DrawText(TextFormat("Tu respuesta: %d", calculator.userAnswer), 10, 130, 20, WHITE);
 
+        // Dibujar el mensaje de respuesta correcta
+        if (calculator.result)
+        {
+            DrawText("¡Respuesta correcta!", 10, 160, 20, GREEN);
+
+            // Cerrar la ventana al desplegar la respuesta
+            if (IsKeyPressed(KEY_ENTER))
+            {
+                break;
+            }
+        }
+
         // Capturar la entrada del usuario
         int key = GetKeyPressed();
         if (key != 0)
@@ -593,14 +605,7 @@ void RunCalculatorWindow(void)
                 }
 
                 // Verificar si la respuesta del usuario es correcta
-                if (userAnswer == calculator.result)
-                {
-                    printf("¡Respuesta correcta!\n");
-                }
-                else
-                {
-                    printf("Respuesta incorrecta. El resultado correcto es: %d\n", calculator.result);
-                }
+                calculator.result = (userAnswer == calculator.result);
 
                 // Limpiar la respuesta del usuario después de mostrar el resultado
                 calculator.userAnswer = 0;
