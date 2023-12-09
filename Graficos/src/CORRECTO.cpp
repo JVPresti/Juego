@@ -107,7 +107,7 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "Serpent Snake");
 
     // Cargar imágenes de fondo
-    backgroundGame = LoadTexture("snakefondo2.png");
+    backgroundGame = LoadTexture("newfondo.png");
     backgroundMenu = LoadTexture("fondo.png");
     font = LoadFont("Valoon.ttf");
     // backgroundMusic = LoadMusicStream("C:\\Users\\nanoj\\OneDrive\\Escritorio\\musicafondo.mp3");
@@ -161,9 +161,9 @@ void InitGame(void)
         snake[i].speed = (Vector2){SQUARE_SIZE, 0};
 
         if (i == 0)
-            snake[i].color = DARKBLUE;
+            snake[i].color = WHITE;
         else
-            snake[i].color = BLUE;
+            snake[i].color = LIGHTGRAY;
     }
 
     for (int i = 0; i < SNAKE_LENGTH; i++)
@@ -172,7 +172,7 @@ void InitGame(void)
     }
 
     fruit.size = (Vector2){SQUARE_SIZE, SQUARE_SIZE};
-    fruit.color = SKYBLUE;
+    fruit.color = ORANGE;
     fruit.active = false;
 }
 
@@ -326,12 +326,12 @@ void DrawGame(void)
         // Dibuja las líneas de la cuadrícula
         for (int i = 0; i < screenWidth / SQUARE_SIZE + 1; i++)
         {
-            DrawLineV((Vector2){SQUARE_SIZE * i + offset.x / 2, offset.y / 2}, (Vector2){SQUARE_SIZE * i + offset.x / 2, screenHeight - offset.y / 2}, DARKGREEN);
+            DrawLineV((Vector2){SQUARE_SIZE * i + offset.x / 2, offset.y / 2}, (Vector2){SQUARE_SIZE * i + offset.x / 2, screenHeight - offset.y / 2}, GRAY);
         }
 
         for (int i = 0; i < screenHeight / SQUARE_SIZE + 1; i++)
         {
-            DrawLineV((Vector2){offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, (Vector2){screenWidth - offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, DARKGREEN);
+            DrawLineV((Vector2){offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, (Vector2){screenWidth - offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, GRAY);
         }
 
         // Dibuja la serpiente
@@ -367,10 +367,10 @@ void DrawGame(void)
         }
 
         // Dibuja un cuadro azul en la posición de la fruta
-        DrawRectangleV(fruit.position, fruit.size, BLUE);
+        DrawRectangleV(fruit.position, fruit.size, RED);
 
         // Muestra el número sobre el cuadro azul
-        DrawText(numberText, fruit.position.x + fruit.size.x / 2 - MeasureText(numberText, 20) / 2, fruit.position.y + fruit.size.y / 2 - 10, 20, RED);
+        DrawText(numberText, fruit.position.x + fruit.size.x / 2 - MeasureText(numberText, 20) / 2, fruit.position.y + fruit.size.y / 2 - 10, 20, WHITE);
 
         // Muestra el signo en la esquina superior derecha
         if (fruitCollected)
