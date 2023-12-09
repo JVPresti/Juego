@@ -33,6 +33,17 @@ typedef struct Food
     Color color;
 } Food;
 
+// Estructura para almacenar los datos de la calculadora
+typedef struct
+{
+    int num1;
+    int num2;
+    char operation;
+    int result;
+    char userAnswer[4];
+
+} CalculatorData;
+
 //------------------------------------------------------------------------------------
 // Declaraciones de variables globales
 //------------------------------------------------------------------------------------
@@ -60,6 +71,7 @@ static int currentNumber = 0;
 static bool numberSelected = false;
 static int firstNumber = 0;
 static int secondNumber = 0;
+void RunCalculatorWindow(void);
 
 // Music backgroundMusic;
 
@@ -291,11 +303,11 @@ void UpdateGame(void)
                 // Aumentar el contador y asignar un nuevo signo cada dos frutas recolectadas
                 if (fruitCollected && (counterTail % 2 == 0))
                 {
-                    char operations[] = {'+', 'x'};
+                    char operations[] = {'+', '*'};
                     fruit.operation = operations[GetRandomValue(0, 1)];
 
                     // Almacena los dos números comidos
-                    firstNumber = atoi(numberText);
+                    firstNumber = GetRandomValue(1, 20);
                     secondNumber = GetRandomValue(1, 20);
                 }
             }
@@ -456,9 +468,9 @@ void UpdateDrawFrame(void)
         // Dibuja el mensaje de pausa en la nueva ventana
         DrawText("Juego en pausa", screenWidth / 2 - MeasureText("Juego en pausa", 40) / 2, screenHeight / 2 - 40, 40, GRAY);
         DrawText("Presiona [ENTER] para continuar", screenWidth / 2 - MeasureText("Presiona [ENTER] para continuar", 20) / 2, screenHeight / 2, 20, GRAY);
-        DrawText(TextFormat("Números comidos: %d, %d", firstNumber, secondNumber), screenWidth / 2 - MeasureText("Números comidos: 00, 00", 20) / 2, screenHeight / 2 + 30, 20, GRAY);
+        DrawText(TextFormat("Números comidos: %2d, %2d", firstNumber, secondNumber), screenWidth / 2 - MeasureText("Números comidos: 00, 00", 20) / 2, screenHeight / 2 + 30, 20, GRAY);
 
-        DrawCalculatorButtons();
+        // DrawCalculatorButtons();
 
         EndDrawing();
 
@@ -469,7 +481,8 @@ void UpdateDrawFrame(void)
         }
 
         // Maneja la entrada de la calculadora
-        HandleCalculatorInput();
+        // HandleCalculatorInput();
+        RunCalculatorWindow();
     }
 }
 
@@ -567,6 +580,7 @@ void DrawCalculatorButtons()
 }
 
 void HandleCalculatorInput()
+
 {
     int buttonWidth = 50;
     int buttonHeight = 50;
@@ -585,4 +599,89 @@ void HandleCalculatorInput()
             numberSelected = true;
         }
     }
+}
+
+void RunCalculatorWindow(void)
+{
+    const int screenWidth = 400;
+    const int screenHeight = 300;
+
+    // Inicializar la ventana
+    InitWindow(screenWidth, screenHeight, "Calculadora");
+
+    // Datos de la calculadora
+    CalculatorData calculator = {0};
+    calculator.num1 = GetRandomValue(1, 20);
+    calculator.num2 = GetRandomValue(1, 20);
+
+    char oper[2] = {'+', '-'};
+    calculator.operation = oper[GetRandomValue(0, 1)];
+
+    // Bucle principal
+    while (!WindowShouldClose())
+    {
+        // Limpiar la pantalla
+        BeginDrawing();
+        ClearBackground(BLACK);
+
+        // Dibujar los datos en la ventana
+        DrawText(TextFormat("Número 1: %d", calculator.num1), 10, 10, 20, WHITE);
+        DrawText(TextFormat("Número 2: %d", calculator.num2), 10, 40, 20, WHITE);
+        DrawText(TextFormat("Operador: %c", calculator.operation), 10, 70, 20, WHITE);
+        DrawText("Ingresa tu respuesta y presiona Enter:", 10, 100, 20, WHITE);
+
+        // Dibujar la respuesta del usuario
+        DrawText(TextFormat("Tu respuesta: %s", calculator.userAnswer), 10, 130, 20, WHITE);
+
+        // Capturar la entrada del usuario
+        int key = GetKeyPressed();
+        if (key != 0 && IsKeyDown(key)) // Verificar si la tecla está siendo presionada
+        {
+            // Agregar el carácter a la respuesta del usuario
+            int len = strlen(calculator.userAnswer);
+            if (len < 3) // Permitir hasta 3 caracteres en la respuesta
+            {
+                calculator.userAnswer[len] = (char)key;
+                calculator.userAnswer[len + 1] = '\0'; // Asegurarse de que la cadena esté terminada correctamente
+            }
+        }
+        else if (IsKeyPressed(KEY_ENTER))
+        {
+            // Calcular el resultado si se presiona Enter
+            int userAnswer = atoi(calculator.userAnswer); // Convertir la respuesta del usuario a un número entero
+
+            switch (calculator.operation)
+            {
+            case '+':
+                calculator.result = calculator.num1 + calculator.num2;
+                break;
+            case '-':
+                calculator.result = calculator.num1 - calculator.num2;
+                break;
+            // Puedes agregar casos adicionales para otros operadores aquí
+            default:
+                printf("Error: Operador no válido\n");
+                break;
+            }
+
+            // Verificar si la respuesta del usuario es correcta
+            if (userAnswer == calculator.result)
+            {
+                printf("¡Respuesta correcta!\n");
+            }
+            else
+            {
+                printf("Respuesta incorrecta. El resultado correcto es: %d\n", calculator.result);
+            }
+
+            // Limpiar la respuesta del usuario después de mostrar el resultado
+            calculator.userAnswer[0] = '\0';
+        }
+
+        // Finalizar el dibujo
+        EndDrawing();
+    }
+
+    // Cerrar la ventana al salir
+    CloseWindow();
 }
