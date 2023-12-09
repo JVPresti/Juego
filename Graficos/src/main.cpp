@@ -103,9 +103,9 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "Serpent Snake");
 
     // Cargar imágenes de fondo
-    backgroundGame = LoadTexture("C:\\Users\\nanoj\\OneDrive\\Escritorio\\snakefondo2.png");
-    backgroundMenu = LoadTexture("C:\\Users\\nanoj\\OneDrive\\Escritorio\\fondo.png");
-    font = LoadFont("C:\\Users\\nanoj\\OneDrive\\Escritorio\\Valoon.ttf");
+    backgroundGame = LoadTexture("snakefondo2.png");
+    backgroundMenu = LoadTexture("fondo.png");
+    font = LoadFont("Valoon.ttf");
     // backgroundMusic = LoadMusicStream("C:\\Users\\nanoj\\OneDrive\\Escritorio\\musicafondo.mp3");
 
     // PlayAudioStream(backgroundMusic);
