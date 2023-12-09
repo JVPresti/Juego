@@ -176,6 +176,7 @@ void InitGame(void)
     fruit.active = false;
 }
 
+//! asdasdssa
 // Actualiza el juego (un frame)
 void UpdateGame(void)
 {
@@ -367,7 +368,7 @@ void DrawGame(void)
         }
 
         // Dibuja un cuadro azul en la posición de la fruta
-        DrawRectangleV(fruit.position, fruit.size, WHITE);
+        DrawRectangleV(fruit.position, fruit.size, RED);
         //! borrar
 
         // Muestra el número sobre el cuadro azul
