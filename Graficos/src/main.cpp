@@ -573,7 +573,7 @@ void RunCalculatorWindow(void)
             {
                 calculator.userAnswer = calculator.userAnswer * 10 + (key - '0');
             }
-            else if (key == '257')
+            else if (key == KEY_ENTER)
             {
                 // Calcular el resultado si se presiona Enter
                 int userAnswer = calculator.userAnswer;
