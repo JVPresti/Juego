@@ -23,7 +23,7 @@ typedef struct Snake
     Vector2 size;
     Vector2 speed;
     Color color;
-} Snake;
+} Snake; //! tratar de agregarle una foto a la serpiente
 
 typedef struct Food
 {
@@ -81,6 +81,9 @@ static Texture2D backgroundMenu;
 // Textura para la calculadora
 static Texture2D backgroundCalculator;
 
+// Textura para la cabeza de la serpiente
+static Texture2D snakeHead;
+
 // Estados del juego
 typedef enum
 {
@@ -116,6 +119,7 @@ int main(void)
     backgroundMenu = LoadTexture("fondo.png");
     backgroundCalculator = LoadTexture("calculadora2.png");
     font = LoadFont("Valoon.ttf");
+    snakeHead = LoadTexture("cabeza.png");
     // backgroundMusic = LoadMusicStream("C:\\Users\\nanoj\\OneDrive\\Escritorio\\musicafondo.mp3");
 
     // PlayAudioStream(backgroundMusic);
@@ -172,9 +176,9 @@ void InitGame(void)
         snake[i].speed = (Vector2){SQUARE_SIZE, 0};
 
         if (i == 0)
-            snake[i].color = WHITE;
+            snake[i].color = RAYWHITE;
         else
-            snake[i].color = LIGHTGRAY;
+            snake[i].color = LIME;
     }
 
     for (int i = 0; i < SNAKE_LENGTH; i++)
@@ -328,7 +332,10 @@ void DrawGame(void)
 
         // Dibuja la serpiente
         for (int i = 0; i < counterTail; i++)
+        {
             DrawRectangleV(snake[i].position, snake[i].size, snake[i].color);
+        }
+        DrawTextureEx(snakeHead, snake[0].position, 0, 0.061, snake[0].color);
 
         // Cálculo de la posición de la fruta
         if (!fruit.active)
