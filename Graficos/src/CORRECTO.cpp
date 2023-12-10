@@ -538,17 +538,17 @@ void RunCalculatorWindow(void)
         DrawText("La operacion a realizar es la siguiente", 197, 12, 20, WHITE);
 
         // Dibujar la operación
-        DrawText(TextFormat("%d %c %d = ?", calculator.num1, calculator.operation, calculator.num2), 254, 63, 60, DARKGREEN);
+        DrawText(TextFormat("%d %c %d = ?", calculator.num1, calculator.operation, calculator.num2), 252, 63, 60, DARKGREEN);
         DrawText("Ingresa tu respuesta y presiona Enter", 195, 142, 20, WHITE);
 
         // Dibujar la respuesta del usuario
-        DrawText("Tu respuesta:", 275, 175, 20, RED);
+        DrawText("Tu respuesta:", 275, 175, 20, DARKPURPLE);
         DrawText(TextFormat("%d", calculator.userAnswer), 300, 240, 100, DARKGREEN);
 
         // Dibujar el mensaje de respuesta correcta
         if (calculator.result)
         {
-            DrawText("¡Respuesta correcta!", 10, 160, 20, GREEN);
+            DrawText("¡Respuesta correcta!", 232, 360, 23, DARKPURPLE);
 
             // Cerrar la ventana al desplegar la respuesta
             if (IsKeyPressed(KEY_ENTER))
