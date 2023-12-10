@@ -54,6 +54,7 @@ static const int screenHeight = 450;
 static int framesCounter = 0;
 static bool gameOver = false;
 static bool pause = false;
+static bool dificultad = false; // falso es facil y verdadero es dificil
 
 static Food fruit = {0};
 static Snake snake[SNAKE_LENGTH] = {0};
@@ -270,14 +271,14 @@ void UpdateGame(void)
                 fruitCollected = true;
                 fruitsEaten += 1;
 
-                if (fruitsEaten == 2)
+                if (fruitsEaten == 3)
                 {
                     pause = true;
                     gameState = PAUSED; // Cambia el estado del juego a pausado
                 }
 
                 // Restablece el contador después de dos frutas comidas
-                if (fruitsEaten == 2)
+                if (fruitsEaten == 3)
                 {
                     fruitsEaten = 0;
                 }
@@ -386,8 +387,9 @@ void UpdateDrawFrame(void)
             }
             else if (selectedOption == 2)
             {
-                // Lógica para la opción 2 después de que el menú se desvanece
-                // ... Agrega la lógica adicional aquí ...
+                InitGame();
+                gameOver = false;
+                gameState = GAME;
             }
             else if (selectedOption == 3)
             {
@@ -455,14 +457,17 @@ void UpdateMenu(void)
         // Realiza acciones específicas según la opción seleccionada
         if (selectedOption == 1)
         {
+            dificultad = false;
             InitGame(); // Inicia el juego
             gameOver = false;
             gameState = GAME; // Cambia al estado del juego después de seleccionar la opción 1
         }
         else if (selectedOption == 2)
         {
-            // Lógica para la opción 2 del menú
-            // Puedes agregar la funcionalidad específica que desees aquí
+            dificultad = true;
+            InitGame(); // Inicia el juego
+            gameOver = false;
+            gameState = GAME; // Cambia al estado del juego después de seleccionar la opción 1
         }
         else if (selectedOption == 3)
         {
@@ -480,8 +485,7 @@ void UpdateMenu(void)
     }
     else if (IsKeyPressed(KEY_TWO))
     {
-        // Lógica para la opción 2 del menú
-        // Puedes agregar la funcionalidad específica que desees aquí
+        menuFadeOut = true; // Inicia la animación de desvanecimiento cuando se selecciona una opción
         selectedOption = 2;
     }
     else if (IsKeyPressed(KEY_THREE))
@@ -508,17 +512,35 @@ void RunCalculatorWindow(void)
 {
     // Datos de la calculadora
     CalculatorData calculator = {0};
-    char oper[2] = {'+', 'x'};
-    calculator.operation = oper[GetRandomValue(0, 1)];
-    if (calculator.operation == 'x')
+    if (dificultad == false) // facil
     {
-        calculator.num1 = GetRandomValue(1, 10);
-        calculator.num2 = GetRandomValue(1, 10);
+        char oper[2] = {'+', 'x'};
+        calculator.operation = oper[GetRandomValue(0, 1)];
+        if (calculator.operation == 'x')
+        {
+            calculator.num1 = GetRandomValue(1, 5);
+            calculator.num2 = GetRandomValue(1, 5);
+        }
+        else if (calculator.operation == '+')
+        {
+            calculator.num1 = GetRandomValue(1, 20);
+            calculator.num2 = GetRandomValue(1, 20);
+        }
     }
-    else if (calculator.operation == '+')
+    else if (dificultad == true) // dificil
     {
-        calculator.num1 = GetRandomValue(1, 20);
-        calculator.num2 = GetRandomValue(1, 20);
+        char oper[2] = {'+', 'x'};
+        calculator.operation = oper[GetRandomValue(0, 1)];
+        if (calculator.operation == 'x')
+        {
+            calculator.num1 = GetRandomValue(1, 10);
+            calculator.num2 = GetRandomValue(1, 10);
+        }
+        else if (calculator.operation == '+')
+        {
+            calculator.num1 = GetRandomValue(1, 40);
+            calculator.num2 = GetRandomValue(1, 40);
+        }
     }
 
     // Bucle principal
