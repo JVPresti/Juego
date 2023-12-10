@@ -517,12 +517,6 @@ void ResetGame(void)
 
 void RunCalculatorWindow(void)
 {
-    const int calcuScreenWidth = 720;
-    const int calcuScreenHeight = 480;
-
-    // Inicializar la ventana
-    // InitWindow(calcuScreenWidth, calcuScreenHeight, "Calculadora");
-
     // Datos de la calculadora
     CalculatorData calculator = {0};
     calculator.num1 = GetRandomValue(1, 20);
@@ -545,10 +539,11 @@ void RunCalculatorWindow(void)
 
         // Dibujar la operación
         DrawText(TextFormat("%d %c %d = ?", calculator.num1, calculator.operation, calculator.num2), 254, 63, 60, DARKGREEN);
-        DrawText("Ingresa tu respuesta y presiona Enter", 195, 140, 20, WHITE);
+        DrawText("Ingresa tu respuesta y presiona Enter", 195, 142, 20, WHITE);
 
         // Dibujar la respuesta del usuario
-        DrawText(TextFormat("Tu respuesta: %d", calculator.userAnswer), 285, 160, 20, WHITE);
+        DrawText("Tu respuesta:", 275, 175, 20, RED);
+        DrawText(TextFormat("%d", calculator.userAnswer), 300, 240, 100, DARKGREEN);
 
         // Dibujar el mensaje de respuesta correcta
         if (calculator.result)
@@ -600,5 +595,4 @@ void RunCalculatorWindow(void)
         // Finalizar el dibujo
         EndDrawing();
     }
-    // CloseWindow();
 }
