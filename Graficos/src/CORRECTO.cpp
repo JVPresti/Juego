@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #if defined(PLATFORM_WEB)
 #include <emscripten/emscripten.h>
@@ -255,14 +256,9 @@ void UpdateGame(void)
             if (!fruit.active)
             {
                 fruit.active = true;
-                int randomNumber = GetRandomValue(1, 20);
-                sprintf(numberText, "%d", randomNumber);
                 fruit.position = (Vector2){GetRandomValue(0, (screenWidth / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.x / 2, GetRandomValue(0, (screenHeight / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.y / 2};
 
-                // Genera frutas con números
-                randomNumber = GetRandomValue(1, 20);
-                sprintf(numberText, "%d", randomNumber);
-                fruit.operation = ' '; // Espacio indica que es una fruta con número
+                fruit.operation = '1'; // Espacio indica que es una fruta con número
             }
 
             // Colisión
@@ -308,24 +304,24 @@ void UpdateGame(void)
 void DrawGame(void)
 {
     char numberText[5];
-    char operationText[30];
     Vector2 bkPosition = {0.0f, 0.0f};
     BeginDrawing();
 
     // Dibuja la imagen de fondo del juego
-    DrawTextureEx(backgroundGame, bkPosition, 0, 0.62, RAYWHITE);
+    ClearBackground(BLACK);
+    DrawTextureEx(backgroundGame, bkPosition, 0, 0.62, Fade(RAYWHITE, 0.8f));
 
     if (!gameOver)
     {
         // Dibuja las líneas de la cuadrícula
         for (int i = 0; i < screenWidth / SQUARE_SIZE + 1; i++)
         {
-            DrawLineV((Vector2){SQUARE_SIZE * i + offset.x / 2, offset.y / 2}, (Vector2){SQUARE_SIZE * i + offset.x / 2, screenHeight - offset.y / 2}, GRAY);
+            DrawLineV((Vector2){SQUARE_SIZE * i + offset.x / 2, offset.y / 2}, (Vector2){SQUARE_SIZE * i + offset.x / 2, screenHeight - offset.y / 2}, DARKGRAY);
         }
 
         for (int i = 0; i < screenHeight / SQUARE_SIZE + 1; i++)
         {
-            DrawLineV((Vector2){offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, (Vector2){screenWidth - offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, GRAY);
+            DrawLineV((Vector2){offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, (Vector2){screenWidth - offset.x / 2, SQUARE_SIZE * i + offset.y / 2}, DARKGRAY);
         }
 
         // Dibuja la serpiente
@@ -336,16 +332,8 @@ void DrawGame(void)
         if (!fruit.active)
         {
             fruit.active = true;
-            int randomNumber = GetRandomValue(1, 20);
-            sprintf(numberText, "%d", randomNumber);
             fruit.position = (Vector2){GetRandomValue(0, (screenWidth / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.x / 2, GetRandomValue(0, (screenHeight / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.y / 2};
-
-            // Genera frutas con números
-            randomNumber = GetRandomValue(1, 20);
-            sprintf(numberText, "%d", randomNumber);
-            fruit.operation = ' '; // Espacio indica que es una fruta con número
-
-            printf("Mensaje de operación: %s\n", operationText);
+            fruit.operation = '1'; // Espacio indica que es una fruta con número
         }
 
         // Dibuja un cuadro azul en la posición de la fruta
@@ -515,6 +503,7 @@ void ResetGame(void)
     selectedOption = 0;
 }
 
+// Ejecuta la ventana de la calculadora
 void RunCalculatorWindow(void)
 {
     // Datos de la calculadora
@@ -555,6 +544,14 @@ void RunCalculatorWindow(void)
             {
                 UpdateDrawFrame();
                 break;
+            }
+        }
+        else
+        {
+            if (IsKeyPressed(KEY_ENTER) && calculator.userAnswer != calculator.result)
+            {
+
+                DrawText("¡Respuesta incorrecta!", 232, 360, 23, DARKPURPLE);
             }
         }
 
