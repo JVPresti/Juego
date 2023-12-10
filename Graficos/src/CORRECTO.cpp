@@ -45,6 +45,11 @@ typedef struct
 
 } CalculatorData;
 
+typedef struct _score
+{
+    int bestScore;
+} Score;
+
 //------------------------------------------------------------------------------------
 // Declaraciones de variables globales
 //------------------------------------------------------------------------------------
@@ -70,7 +75,8 @@ bool fruitCollected = false;
 int collected = 0;
 char numberText[5];
 int fruitsEaten = 0;
-void RunCalculatorWindow(void);
+static int score = 0;
+Font font;
 
 // Textura para el fondo del juego
 static Texture2D backgroundGame;
@@ -105,7 +111,9 @@ static void UpdateDrawFrame(void); // Actualiza y dibuja (un frame)
 static void DrawMenu(void);        // Dibuja el menú
 static void UpdateMenu(void);      // Actualiza el menú
 void ResetGame(void);              // Reinicia el juego
-Font font;
+void RunCalculatorWindow(void);    // Ejecuta la ventana de la calculadora
+void binFileAdd(int newScore);     // Función para guardar la puntuación en un archivo binario
+int loadScore(void);               // Función para cargar la puntuación desde el archivo binario
 //------------------------------------------------------------------------------------
 // Punto de entrada principal del programa
 //------------------------------------------------------------------------------------
@@ -189,6 +197,11 @@ void InitGame(void)
     fruit.size = (Vector2){SQUARE_SIZE, SQUARE_SIZE};
     fruit.color = ORANGE;
     fruit.active = false;
+
+    // Restablece el puntaje actual a 0 al iniciar una nueva partida
+    score = 0;
+    // Guarda el puntaje actual en el archivo binario
+    binFileAdd(score);
 }
 
 // Actualiza el juego (un frame)
@@ -275,6 +288,8 @@ void UpdateGame(void)
                 fruit.active = false;
                 fruitCollected = true;
                 fruitsEaten += 1;
+                score += 1;
+                printf("Score: %d\n", score);
 
                 if (fruitsEaten == 3)
                 {
@@ -310,6 +325,8 @@ void UpdateGame(void)
 void DrawGame(void)
 {
     char numberText[5];
+    char currentScoreText[20];
+    char bestScoreText[20];
     Vector2 bkPosition = {0.0f, 0.0f};
     BeginDrawing();
 
@@ -350,6 +367,15 @@ void DrawGame(void)
 
         // Muestra el número sobre el cuadro azul
         DrawText(numberText, fruit.position.x + fruit.size.x / 2 - MeasureText(numberText, 20) / 2, fruit.position.y + fruit.size.y / 2 - 10, 20, WHITE);
+
+        // Dibuja el puntaje actual
+        snprintf(currentScoreText, sizeof(currentScoreText), "Score: %d", score);
+        DrawText(currentScoreText, 10, 10, 15, WHITE);
+
+        int beScor = loadScore();
+        // Dibuja el mejor puntaje
+        snprintf(bestScoreText, sizeof(bestScoreText), "Best Score: %d", beScor);
+        DrawText(bestScoreText, 695, 10, 15, WHITE);
 
         // Muestra el signo en la esquina superior derecha
         if (fruitCollected)
@@ -515,6 +541,8 @@ void ResetGame(void)
     menuFadeOut = false;
     menuAlpha = 1.0f;
     selectedOption = 0;
+    binFileAdd(score);
+    score = 0;
 }
 
 // Ejecuta la ventana de la calculadora
@@ -631,4 +659,61 @@ void RunCalculatorWindow(void)
         // Finalizar el dibujo
         EndDrawing();
     }
+}
+
+// Función para guardar la puntuación en un archivo binario
+void binFileAdd(int newScore)
+{
+    FILE *file;
+    Score x;
+
+    // Abrir el archivo binario en modo lectura y escritura
+    file = fopen("score.bin", "r+b");
+
+    if (file == NULL)
+    {
+        // Si el archivo no existe, crearlo en modo escritura binaria
+        file = fopen("score.bin", "wb");
+        if (file == NULL)
+        {
+            printf("Error al abrir el archivo\n");
+            return;
+        }
+    }
+
+    // Leer la puntuación actual desde el archivo
+    fread(&x, sizeof(Score), 1, file);
+
+    // Comparar y actualizar el mejor puntaje
+    if (newScore > x.bestScore)
+    {
+        x.bestScore = newScore;
+    }
+
+    // Moverse al principio del archivo y escribir los datos actualizados
+    fseek(file, 0, SEEK_SET);
+    fwrite(&x, sizeof(Score), 1, file);
+
+    fclose(file);
+}
+
+int loadScore(void)
+{
+    FILE *file;
+    Score x;
+
+    file = fopen("score.bin", "rb");
+    if (file == NULL)
+    {
+        printf("Error al abrir el archivo\n");
+        return 0; // Devuelve 0 en caso de error
+    }
+
+    // Leer la puntuación desde el archivo
+    fread(&x, sizeof(Score), 1, file);
+
+    fclose(file);
+
+    // Devuelve la puntuación almacenada
+    return x.bestScore;
 }
