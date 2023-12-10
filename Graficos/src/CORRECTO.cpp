@@ -508,11 +508,18 @@ void RunCalculatorWindow(void)
 {
     // Datos de la calculadora
     CalculatorData calculator = {0};
-    calculator.num1 = GetRandomValue(1, 20);
-    calculator.num2 = GetRandomValue(1, 20);
-
     char oper[2] = {'+', 'x'};
     calculator.operation = oper[GetRandomValue(0, 1)];
+    if (calculator.operation == 'x')
+    {
+        calculator.num1 = GetRandomValue(1, 10);
+        calculator.num2 = GetRandomValue(1, 10);
+    }
+    else if (calculator.operation == '+')
+    {
+        calculator.num1 = GetRandomValue(1, 20);
+        calculator.num2 = GetRandomValue(1, 20);
+    }
 
     // Bucle principal
     while (!WindowShouldClose())
