@@ -75,6 +75,9 @@ static Texture2D backgroundGame;
 // Textura para el fondo del menú
 static Texture2D backgroundMenu;
 
+// Textura para la calculadora
+static Texture2D backgroundCalculator;
+
 // Estados del juego
 typedef enum
 {
@@ -108,6 +111,7 @@ int main(void)
     // Cargar imágenes de fondo
     backgroundGame = LoadTexture("newfondo.png");
     backgroundMenu = LoadTexture("fondo.png");
+    backgroundCalculator = LoadTexture("calculadora2.png");
     font = LoadFont("Valoon.ttf");
     // backgroundMusic = LoadMusicStream("C:\\Users\\nanoj\\OneDrive\\Escritorio\\musicafondo.mp3");
 
@@ -127,6 +131,11 @@ int main(void)
         // Actualizar y Dibujar
         //----------------------------------------------------------------------------------
         UpdateDrawFrame();
+
+        if (gameState == PAUSED)
+        {
+            RunCalculatorWindow();
+        }
         //----------------------------------------------------------------------------------
     }
 #endif
@@ -508,11 +517,11 @@ void ResetGame(void)
 
 void RunCalculatorWindow(void)
 {
-    const int screenWidth = 720;
-    const int screenHeight = 480;
+    const int calcuScreenWidth = 720;
+    const int calcuScreenHeight = 480;
 
     // Inicializar la ventana
-    InitWindow(screenWidth, screenHeight, "Calculadora");
+    // InitWindow(calcuScreenWidth, calcuScreenHeight, "Calculadora");
 
     // Datos de la calculadora
     CalculatorData calculator = {0};
@@ -526,8 +535,10 @@ void RunCalculatorWindow(void)
     while (!WindowShouldClose())
     {
         // Limpiar la pantalla
+        Vector2 bkPosition = {0.0f, 0.0f};
         BeginDrawing();
-        ClearBackground(BLACK);
+        ClearBackground(RED);
+        DrawTextureEx(backgroundCalculator, bkPosition, 0.0, 1.0, WHITE);
 
         // Dibujar los datos en la ventana
         DrawText("La operacion a realizar es la siguiente: ", 160, 90, 20, WHITE);
@@ -547,6 +558,7 @@ void RunCalculatorWindow(void)
             // Cerrar la ventana al desplegar la respuesta
             if (IsKeyPressed(KEY_ENTER))
             {
+                UpdateDrawFrame();
                 break;
             }
         }
@@ -588,7 +600,5 @@ void RunCalculatorWindow(void)
         // Finalizar el dibujo
         EndDrawing();
     }
-
-    // Cerrar la ventana al salir
-    CloseWindow();
+    // CloseWindow();
 }
