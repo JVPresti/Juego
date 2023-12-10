@@ -55,6 +55,7 @@ static int framesCounter = 0;
 static bool gameOver = false;
 static bool pause = false;
 static bool dificultad = false; // falso es facil y verdadero es dificil
+static int speedDificultad;
 
 static Food fruit = {0};
 static Snake snake[SNAKE_LENGTH] = {0};
@@ -222,7 +223,7 @@ void UpdateGame(void)
             for (int i = 0; i < counterTail; i++)
                 snakePosition[i] = snake[i].position;
 
-            if ((framesCounter % 14) == 0)
+            if ((framesCounter % speedDificultad) == 0)
             {
                 for (int i = 0; i < counterTail; i++)
                 {
@@ -458,6 +459,7 @@ void UpdateMenu(void)
         if (selectedOption == 1)
         {
             dificultad = false;
+            speedDificultad = 14;
             InitGame(); // Inicia el juego
             gameOver = false;
             gameState = GAME; // Cambia al estado del juego después de seleccionar la opción 1
@@ -465,6 +467,7 @@ void UpdateMenu(void)
         else if (selectedOption == 2)
         {
             dificultad = true;
+            speedDificultad = 9;
             InitGame(); // Inicia el juego
             gameOver = false;
             gameState = GAME; // Cambia al estado del juego después de seleccionar la opción 1
