@@ -541,11 +541,11 @@ void RunCalculatorWindow(void)
         DrawTextureEx(backgroundCalculator, bkPosition, 0.0, 1.0, WHITE);
 
         // Dibujar los datos en la ventana
-        DrawText("La operacion a realizar es la siguiente: ", 160, 90, 20, WHITE);
+        DrawText("La operacion a realizar es la siguiente", 197, 12, 20, WHITE);
 
         // Dibujar la operación
-        DrawText(TextFormat("%d %c %d = ?", calculator.num1, calculator.operation, calculator.num2), 320, 110, 20, WHITE);
-        DrawText("Ingresa tu respuesta y presiona Enter:", 160, 130, 20, WHITE);
+        DrawText(TextFormat("%d %c %d = ?", calculator.num1, calculator.operation, calculator.num2), 254, 63, 60, DARKGREEN);
+        DrawText("Ingresa tu respuesta y presiona Enter", 195, 140, 20, WHITE);
 
         // Dibujar la respuesta del usuario
         DrawText(TextFormat("Tu respuesta: %d", calculator.userAnswer), 285, 160, 20, WHITE);
