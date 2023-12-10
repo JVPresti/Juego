@@ -69,7 +69,6 @@ char numberText[5];
 int fruitsEaten = 0;
 void RunCalculatorWindow(void);
 
-
 // Textura para el fondo del juego
 static Texture2D backgroundGame;
 
@@ -251,24 +250,10 @@ void UpdateGame(void)
                 sprintf(numberText, "%d", randomNumber);
                 fruit.position = (Vector2){GetRandomValue(0, (screenWidth / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.x / 2, GetRandomValue(0, (screenHeight / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.y / 2};
 
-                if (collected == 2)
-                {
-                    // Genera frutas con operaciones
-                    char operations[] = {'+', 'x'};
-                    fruit.operation = operations[GetRandomValue(0, 1)];
-
-                    // Muestra el mensaje con el signo aleatorio en pantalla
-                    char operationText[30];
-                    sprintf(operationText, "La operacion a resolver es una %c", fruit.operation);
-                    DrawText(operationText, 10, 10, 20, RED);
-                }
-                else
-                {
-                    // Genera frutas con números
-                    randomNumber = GetRandomValue(1, 20);
-                    sprintf(numberText, "%d", randomNumber);
-                    fruit.operation = ' '; // Espacio indica que es una fruta con número
-                }
+                // Genera frutas con números
+                randomNumber = GetRandomValue(1, 20);
+                sprintf(numberText, "%d", randomNumber);
+                fruit.operation = ' '; // Espacio indica que es una fruta con número
             }
 
             // Colisión
@@ -346,23 +331,11 @@ void DrawGame(void)
             sprintf(numberText, "%d", randomNumber);
             fruit.position = (Vector2){GetRandomValue(0, (screenWidth / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.x / 2, GetRandomValue(0, (screenHeight / SQUARE_SIZE) - 1) * SQUARE_SIZE + offset.y / 2};
 
-            if (collected == 2)
-            {
-                // Genera frutas con operaciones
-                char operations[] = {'+', 'x'};
-                fruit.operation = operations[GetRandomValue(0, 1)];
+            // Genera frutas con números
+            randomNumber = GetRandomValue(1, 20);
+            sprintf(numberText, "%d", randomNumber);
+            fruit.operation = ' '; // Espacio indica que es una fruta con número
 
-                // Muestra el mensaje con el signo aleatorio en pantalla
-                sprintf(operationText, "La operacion a resolver es una %c", fruit.operation);
-                DrawText(operationText, screenWidth - 200, 10, 20, RED);
-            }
-            else
-            {
-                // Genera frutas con números
-                randomNumber = GetRandomValue(1, 20);
-                sprintf(numberText, "%d", randomNumber);
-                fruit.operation = ' '; // Espacio indica que es una fruta con número
-            }
             printf("Mensaje de operación: %s\n", operationText);
         }
 
@@ -522,6 +495,7 @@ void UpdateMenu(void)
     }
 }
 
+// Reinicia el juego
 void ResetGame(void)
 {
     InitGame();
@@ -534,8 +508,8 @@ void ResetGame(void)
 
 void RunCalculatorWindow(void)
 {
-    const int screenWidth = 400;
-    const int screenHeight = 300;
+    const int screenWidth = 720;
+    const int screenHeight = 480;
 
     // Inicializar la ventana
     InitWindow(screenWidth, screenHeight, "Calculadora");
@@ -545,7 +519,7 @@ void RunCalculatorWindow(void)
     calculator.num1 = GetRandomValue(1, 20);
     calculator.num2 = GetRandomValue(1, 20);
 
-    char oper[2] = {'+', '-'};
+    char oper[2] = {'+', 'x'};
     calculator.operation = oper[GetRandomValue(0, 1)];
 
     // Bucle principal
@@ -556,13 +530,14 @@ void RunCalculatorWindow(void)
         ClearBackground(BLACK);
 
         // Dibujar los datos en la ventana
-        DrawText(TextFormat("Número 1: %d", calculator.num1), 10, 10, 20, WHITE);
-        DrawText(TextFormat("Número 2: %d", calculator.num2), 10, 40, 20, WHITE);
-        DrawText(TextFormat("Operador: %c", calculator.operation), 10, 70, 20, WHITE);
-        DrawText("Ingresa tu respuesta y presiona Enter:", 10, 100, 20, WHITE);
+        DrawText("La operacion a realizar es la siguiente: ", 160, 90, 20, WHITE);
+
+        // Dibujar la operación
+        DrawText(TextFormat("%d %c %d = ?", calculator.num1, calculator.operation, calculator.num2), 320, 110, 20, WHITE);
+        DrawText("Ingresa tu respuesta y presiona Enter:", 160, 130, 20, WHITE);
 
         // Dibujar la respuesta del usuario
-        DrawText(TextFormat("Tu respuesta: %d", calculator.userAnswer), 10, 130, 20, WHITE);
+        DrawText(TextFormat("Tu respuesta: %d", calculator.userAnswer), 285, 160, 20, WHITE);
 
         // Dibujar el mensaje de respuesta correcta
         if (calculator.result)
@@ -594,10 +569,9 @@ void RunCalculatorWindow(void)
                 case '+':
                     calculator.result = calculator.num1 + calculator.num2;
                     break;
-                case '-':
-                    calculator.result = calculator.num1 - calculator.num2;
+                case 'x':
+                    calculator.result = calculator.num1 * calculator.num2;
                     break;
-                // Puedes agregar casos adicionales para otros operadores aquí
                 default:
                     printf("Error: Operador no válido\n");
                     break;
