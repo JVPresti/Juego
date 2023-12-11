@@ -17,6 +17,8 @@
 //----------------------------------------------------------------------------------
 // Tipos y definiciones de estructuras
 //----------------------------------------------------------------------------------
+
+// Estructura para almacenar los datos de la serpiente
 typedef struct Snake
 {
     Vector2 position;
@@ -25,6 +27,7 @@ typedef struct Snake
     Color color;
 } Snake;
 
+// Estructura para almacenar los datos de la fruta
 typedef struct Food
 {
     Vector2 position;
@@ -46,10 +49,19 @@ typedef struct
 
 } CalculatorData;
 
+// Mejor puntuación
 typedef struct _score
 {
     int bestScore;
 } Score;
+
+// Estados del juego
+typedef enum
+{
+    MENU,
+    GAME,
+    PAUSED
+} GameState;
 
 //------------------------------------------------------------------------------------
 // Declaraciones de variables globales
@@ -61,7 +73,7 @@ static int framesCounter = 0;
 static bool gameOver = false;
 static bool pause = false;
 static bool dificultad = false; // falso es facil y verdadero es dificil
-static int speedDificultad;
+static int speedDificultad;     // velocidad de la serpiente
 
 static Food fruit = {0};
 static Snake snake[SNAKE_LENGTH] = {0};
@@ -77,6 +89,8 @@ int collected = 0;
 char numberText[5];
 int fruitsEaten = 0;
 static int score = 0;
+
+// Dato para la fuente
 Font font;
 
 // Textura para el fondo del juego
@@ -91,19 +105,13 @@ static Texture2D backgroundCalculator;
 // Textura para la cabeza de la serpiente
 static Texture2D snakeHead;
 
-// Estados del juego
-typedef enum
-{
-    MENU,
-    GAME,
-    PAUSED
-} GameState;
-
+// Cambiar de imagen
 static GameState gameState = MENU;
 
 //------------------------------------------------------------------------------------
 // Declaraciones de funciones locales
 //------------------------------------------------------------------------------------
+
 static void InitGame(void);        // Inicializa el juego
 static void UpdateGame(void);      // Actualiza el juego (un frame)
 static void DrawGame(void);        // Dibuja el juego (un frame)
@@ -115,7 +123,8 @@ void ResetGame(void);              // Reinicia el juego
 void RunCalculatorWindow(void);    // Ejecuta la ventana de la calculadora
 void binFileAdd(int newScore);     // Función para guardar la puntuación en un archivo binario
 int loadScore(void);               // Función para cargar la puntuación desde el archivo binario
-int NumTextLength(int num);
+int NumTextLength(int num);        // Función para calcular la longitud de un número entero
+
 //------------------------------------------------------------------------------------
 // Punto de entrada principal del programa
 //------------------------------------------------------------------------------------
@@ -128,11 +137,8 @@ int main(void)
     backgroundGame = LoadTexture("newfondo.png");
     backgroundMenu = LoadTexture("fondo.png");
     backgroundCalculator = LoadTexture("calculadora2.png");
-    font = LoadFont("abs.otf");
     snakeHead = LoadTexture("cabeza.png");
-    // backgroundMusic = LoadMusicStream("C:\\Users\\nanoj\\OneDrive\\Escritorio\\musicafondo.mp3");
-
-    // PlayAudioStream(backgroundMusic);
+    font = LoadFont("abs.otf");
 
     InitGame();
 
@@ -173,7 +179,7 @@ void InitGame(void)
     gameOver = false;
     pause = false;
 
-    counterTail = 1;
+    counterTail = 1; // Longitud inicial de la serpiente
     allowMove = false;
 
     offset.x = screenWidth % SQUARE_SIZE;
@@ -202,9 +208,8 @@ void InitGame(void)
     fruit.texture = LoadTexture("manzana.png");
 
     // Restablece el puntaje actual a 0 al iniciar una nueva partida
-    binFileAdd(score);
-    score = 0;
-    // Guarda el puntaje actual en el archivo binario
+    binFileAdd(score); // Guarda el puntaje actual en el archivo binario
+    score = 0;         // Restablece el puntaje actual a 0
 }
 
 // Actualiza el juego (un frame)
@@ -375,8 +380,8 @@ void DrawGame(void)
         snprintf(currentScoreText, sizeof(currentScoreText), "Score: %d", score);
         DrawText(currentScoreText, 10, 10, 18, WHITE);
 
-        int beScor = loadScore();
         // Dibuja el mejor puntaje
+        int beScor = loadScore();
         snprintf(bestScoreText, sizeof(bestScoreText), "Best Score: %d", beScor);
         DrawText(bestScoreText, 670, 10, 18, WHITE);
 
@@ -413,7 +418,7 @@ void UpdateDrawFrame(void)
     {
         UpdateMenu();
         DrawMenu();
-        if (menuAlpha == 0.0f)
+        if (menuAlpha == 0.0f) // Verifica si el menú se ha desvanecido completamente
         {
             if (selectedOption == 1)
             {
@@ -489,7 +494,7 @@ void UpdateMenu(void)
     if (menuAlpha < 2.0f)
         menuAlpha = 2.0f;
 
-    if (menuFadeOut)
+    if (menuFadeOut) // Verifica si se ha seleccionado una opción
     {
         // Realiza acciones específicas según la opción seleccionada
         if (selectedOption == 1)
