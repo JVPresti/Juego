@@ -1,3 +1,17 @@
+/*
+
+    Este juego fue programado por: Jorge Vazquez Y Gilberto Diarte
+
+    Serpent Operation
+    El juego consiste en una serpiente que se mueve por la pantalla y debe comerse las frutas que aparecen en la pantalla
+    para poder crecer, cada fruta tiene un numero y un signo de operacion, el jugador debe resolver la operacion y escribir el resultado
+
+    Juego creado sin fines de lucro, solo con fines educativos
+
+    ©Todos los derechos reservados
+
+*/
+
 #include "raylib.h"
 #include <string.h>
 #include <stdio.h>
@@ -763,3 +777,6 @@ int loadScore(void)
     // Devuelve la puntuación almacenada
     return x.bestScore;
 }
+
+// © Todos los derechos reservados 2024
+// © VSDEVS 2024
