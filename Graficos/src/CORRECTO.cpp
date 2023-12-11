@@ -9,7 +9,7 @@
     Juego creado sin fines de lucro, solo con fines educativos
 
     ©Todos los derechos reservados
-
+    ©VSDEVS 2024
 */
 
 #include "raylib.h"
