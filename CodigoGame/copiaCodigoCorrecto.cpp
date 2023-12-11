@@ -49,7 +49,7 @@ typedef struct
 
 } CalculatorData;
 
-// Estructura para almacenar los datos de la puntuación
+// Mejor puntuación
 typedef struct _score
 {
     int bestScore;
@@ -66,7 +66,6 @@ typedef enum
 //------------------------------------------------------------------------------------
 // Declaraciones de variables globales
 //------------------------------------------------------------------------------------
-
 static const int screenWidth = 800;
 static const int screenHeight = 450;
 
@@ -91,7 +90,7 @@ char numberText[5];
 int fruitsEaten = 0;
 static int score = 0;
 
-// Fuente para el texto
+// Dato para la fuente
 Font font;
 
 // Textura para el fondo del juego
@@ -106,7 +105,7 @@ static Texture2D backgroundCalculator;
 // Textura para la cabeza de la serpiente
 static Texture2D snakeHead;
 
-// Indica el estado actual del juego
+// Cambiar de imagen
 static GameState gameState = MENU;
 
 //------------------------------------------------------------------------------------
@@ -129,12 +128,10 @@ int NumTextLength(int num);        // Función para calcular la longitud de un n
 //------------------------------------------------------------------------------------
 // Punto de entrada principal del programa
 //------------------------------------------------------------------------------------
-
 int main(void)
 {
     //---------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "Serpent Operation");
-    InitAudioDevice();
 
     // Cargar imágenes de fondo
     backgroundGame = LoadTexture("newfondo.png");
@@ -142,11 +139,6 @@ int main(void)
     backgroundCalculator = LoadTexture("calculadora2.png");
     snakeHead = LoadTexture("cabeza.png");
     font = LoadFont("abs.otf");
-    Music backgroundMusic = LoadMusicStream("zelda.mp3");
-
-    // Inicia la música de fondo
-    PlayMusicStream(backgroundMusic);
-    SetMusicVolume(backgroundMusic, 0.2f); // Establece el volumen de la música de fondo
 
     InitGame();
 
@@ -161,7 +153,6 @@ int main(void)
     {
         // Actualizar y Dibujar
         //----------------------------------------------------------------------------------
-        UpdateMusicStream(backgroundMusic);
         UpdateDrawFrame();
 
         if (gameState == PAUSED)
@@ -170,9 +161,6 @@ int main(void)
         }
         //----------------------------------------------------------------------------------
     }
-    StopMusicStream(backgroundMusic);
-    UnloadMusicStream(backgroundMusic);
-
 #endif
     // Descarga de recursos
     //--------------------------------------------------------------------------------------
@@ -217,13 +205,11 @@ void InitGame(void)
     fruit.size = (Vector2){SQUARE_SIZE, SQUARE_SIZE};
     fruit.color = ORANGE;
     fruit.active = false;
-    fruit.texture = LoadTexture("manzana.png"); // Carga la textura de la fruta
-
-    // Guarda el puntaje actual en el archivo binari
-    binFileAdd(score);
+    fruit.texture = LoadTexture("manzana.png");
 
     // Restablece el puntaje actual a 0 al iniciar una nueva partida
-    score = 0;
+    binFileAdd(score); // Guarda el puntaje actual en el archivo binario
+    score = 0;         // Restablece el puntaje actual a 0
 }
 
 // Actualiza el juego (un frame)
@@ -311,6 +297,7 @@ void UpdateGame(void)
                 fruitCollected = true;
                 fruitsEaten += 1;
                 score += 1;
+                printf("Score: %d\n", score);
 
                 if (fruitsEaten == 3)
                 {
@@ -373,7 +360,7 @@ void DrawGame(void)
         {
             DrawRectangleV(snake[i].position, snake[i].size, snake[i].color);
         }
-        DrawTextureEx(snakeHead, snake[0].position, 0, 0.061, snake[0].color); // Dibuja la cabeza de la serpiente
+        DrawTextureEx(snakeHead, snake[0].position, 0, 0.061, snake[0].color);
 
         // Cálculo de la posición de la fruta
         if (!fruit.active)
@@ -420,6 +407,7 @@ void UnloadGame(void)
     // Descarga las texturas de fondo
     UnloadTexture(backgroundGame);
     UnloadTexture(backgroundMenu);
+    // UnloadMusicStream(backgroundMusic);
     UnloadFont(font);
 }
 
@@ -430,7 +418,7 @@ void UpdateDrawFrame(void)
     {
         UpdateMenu();
         DrawMenu();
-        if (menuAlpha == 0.0f) // Verifica si el menú se ha desvanecido
+        if (menuAlpha == 0.0f) // Verifica si el menú se ha desvanecido completamente
         {
             if (selectedOption == 1)
             {
@@ -561,8 +549,8 @@ void ResetGame(void)
     menuFadeOut = false;
     menuAlpha = 1.0f;
     selectedOption = 0;
-    binFileAdd(score); // Guarda el puntaje actual en el archivo binario
-    score = 0;         // Restablece el puntaje actual a 0 al iniciar una nueva partida
+    binFileAdd(score);
+    score = 0;
 }
 
 // Ejecuta la ventana de la calculadora
