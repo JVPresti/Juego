@@ -94,6 +94,9 @@ static int score = 0;
 // Fuente para el texto
 Font font;
 
+// Textura para el icono de la ventana
+static Texture2D icono;
+
 // Textura para el fondo del juego
 static Texture2D backgroundGame;
 
@@ -108,6 +111,9 @@ static Texture2D snakeHead;
 
 // Indica el estado actual del juego
 static GameState gameState = MENU;
+
+// Musica de fondo
+static Music backgroundMusic;
 
 //------------------------------------------------------------------------------------
 // Declaraciones de funciones locales
@@ -134,6 +140,7 @@ int main(void)
 {
     //---------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "Serpent Operation");
+    SetWindowIcon(LoadImage("icon.png"));
     InitAudioDevice();
 
     // Cargar imágenes de fondo
@@ -142,7 +149,8 @@ int main(void)
     backgroundCalculator = LoadTexture("calculadora2.png");
     snakeHead = LoadTexture("cabeza.png");
     font = LoadFont("abs.otf");
-    Music backgroundMusic = LoadMusicStream("zelda.mp3");
+    backgroundMusic = LoadMusicStream("zelda.mp3");
+    icono = LoadTexture("icon.png");
 
     // Inicia la música de fondo
     PlayMusicStream(backgroundMusic);
@@ -166,12 +174,12 @@ int main(void)
 
         if (gameState == PAUSED)
         {
+            UpdateMusicStream(backgroundMusic);
             RunCalculatorWindow();
         }
         //----------------------------------------------------------------------------------
     }
-    StopMusicStream(backgroundMusic);
-    UnloadMusicStream(backgroundMusic);
+    UpdateMusicStream(backgroundMusic);
 
 #endif
     // Descarga de recursos
@@ -418,6 +426,8 @@ void DrawGame(void)
 void UnloadGame(void)
 {
     // Descarga las texturas de fondo
+    StopMusicStream(backgroundMusic);
+    UnloadMusicStream(backgroundMusic);
     UnloadTexture(backgroundGame);
     UnloadTexture(backgroundMenu);
     UnloadFont(font);
@@ -568,7 +578,8 @@ void ResetGame(void)
 // Ejecuta la ventana de la calculadora
 void RunCalculatorWindow(void)
 {
-    // Datos de la calculadora
+    UpdateMusicStream(backgroundMusic);
+    //  Datos de la calculadora
     CalculatorData calculator = {0};
     if (dificultad == false) // facil
     {
@@ -604,6 +615,7 @@ void RunCalculatorWindow(void)
     // Bucle principal
     while (!WindowShouldClose())
     {
+        UpdateMusicStream(backgroundMusic);
         // Limpiar la pantalla
         Vector2 bkPosition = {0.0f, 0.0f};
         BeginDrawing();
