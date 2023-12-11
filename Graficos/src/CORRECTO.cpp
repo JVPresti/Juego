@@ -23,7 +23,7 @@ typedef struct Snake
     Vector2 size;
     Vector2 speed;
     Color color;
-} Snake; //! tratar de agregarle una foto a la serpiente
+} Snake;
 
 typedef struct Food
 {
@@ -32,6 +32,7 @@ typedef struct Food
     bool active;
     char operation;
     Color color;
+    Texture2D texture;
 } Food;
 
 // Estructura para almacenar los datos de la calculadora
@@ -89,6 +90,9 @@ static Texture2D backgroundCalculator;
 
 // Textura para la cabeza de la serpiente
 static Texture2D snakeHead;
+
+// textura de la manzana
+static Texture2D apple;
 
 // Estados del juego
 typedef enum
@@ -197,11 +201,12 @@ void InitGame(void)
     fruit.size = (Vector2){SQUARE_SIZE, SQUARE_SIZE};
     fruit.color = ORANGE;
     fruit.active = false;
+    fruit.texture = LoadTexture("manzana.png");
 
     // Restablece el puntaje actual a 0 al iniciar una nueva partida
+    binFileAdd(score);
     score = 0;
     // Guarda el puntaje actual en el archivo binario
-    binFileAdd(score);
 }
 
 // Actualiza el juego (un frame)
@@ -362,8 +367,8 @@ void DrawGame(void)
             fruit.operation = '1'; // Espacio indica que es una fruta con número
         }
 
-        // Dibuja un cuadro azul en la posición de la fruta
-        DrawRectangleV(fruit.position, fruit.size, RED);
+        // Dibuja una manzana en la posición de la fruta
+        DrawTextureEx(fruit.texture, fruit.position, 0, 0.095, WHITE);
 
         // Muestra el número sobre el cuadro azul
         DrawText(numberText, fruit.position.x + fruit.size.x / 2 - MeasureText(numberText, 20) / 2, fruit.position.y + fruit.size.y / 2 - 10, 20, WHITE);
@@ -375,7 +380,7 @@ void DrawGame(void)
         int beScor = loadScore();
         // Dibuja el mejor puntaje
         snprintf(bestScoreText, sizeof(bestScoreText), "Best Score: %d", beScor);
-        DrawText(bestScoreText, 695, 10, 15, WHITE);
+        DrawText(bestScoreText, 680, 10, 15, WHITE);
 
         // Muestra el signo en la esquina superior derecha
         if (fruitCollected)
