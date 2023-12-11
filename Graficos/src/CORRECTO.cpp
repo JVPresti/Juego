@@ -91,9 +91,6 @@ static Texture2D backgroundCalculator;
 // Textura para la cabeza de la serpiente
 static Texture2D snakeHead;
 
-// textura de la manzana
-static Texture2D apple;
-
 // Estados del juego
 typedef enum
 {
@@ -118,19 +115,20 @@ void ResetGame(void);              // Reinicia el juego
 void RunCalculatorWindow(void);    // Ejecuta la ventana de la calculadora
 void binFileAdd(int newScore);     // Función para guardar la puntuación en un archivo binario
 int loadScore(void);               // Función para cargar la puntuación desde el archivo binario
+int NumTextLength(int num);
 //------------------------------------------------------------------------------------
 // Punto de entrada principal del programa
 //------------------------------------------------------------------------------------
 int main(void)
 {
     //---------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "Serpent Snake");
+    InitWindow(screenWidth, screenHeight, "Serpent Operation");
 
     // Cargar imágenes de fondo
     backgroundGame = LoadTexture("newfondo.png");
     backgroundMenu = LoadTexture("fondo.png");
     backgroundCalculator = LoadTexture("calculadora2.png");
-    font = LoadFont("Valoon.ttf");
+    font = LoadFont("abs.otf");
     snakeHead = LoadTexture("cabeza.png");
     // backgroundMusic = LoadMusicStream("C:\\Users\\nanoj\\OneDrive\\Escritorio\\musicafondo.mp3");
 
@@ -375,12 +373,12 @@ void DrawGame(void)
 
         // Dibuja el puntaje actual
         snprintf(currentScoreText, sizeof(currentScoreText), "Score: %d", score);
-        DrawText(currentScoreText, 10, 10, 15, WHITE);
+        DrawText(currentScoreText, 10, 10, 18, WHITE);
 
         int beScor = loadScore();
         // Dibuja el mejor puntaje
         snprintf(bestScoreText, sizeof(bestScoreText), "Best Score: %d", beScor);
-        DrawText(bestScoreText, 680, 10, 15, WHITE);
+        DrawText(bestScoreText, 670, 10, 18, WHITE);
 
         // Muestra el signo en la esquina superior derecha
         if (fruitCollected)
@@ -472,13 +470,13 @@ void DrawMenu(void)
     BeginDrawing();
 
     // Dibuja la imagen de fondo del menú con opacidad
-    DrawTextureEx(backgroundMenu, bkPosition, 0, 0.85, Fade(RAYWHITE, menuAlpha));
+    DrawTextureEx(backgroundMenu, bkPosition, 0, 1, Fade(RAYWHITE, menuAlpha));
 
     // Realiza conversiones explícitas de int a float para evitar warnings
-    DrawTextEx(font, "Operation Snake", (Vector2){(float)(screenWidth / 2 - MeasureText("Operation Snake", 40) / 2), (float)(screenHeight / 2 - 40)}, 40, 0, BLACK);
-    DrawTextEx(font, "1. Nivel Facil", (Vector2){(float)(screenWidth / 2 - MeasureText("1. Nivel Facil", 20) / 2), (float)(screenHeight / 2)}, 20, 0, Fade(BLACK, menuAlpha));
-    DrawTextEx(font, "2. Nivel Dificil", (Vector2){(float)(screenWidth / 2 - MeasureText("2. Nivel Dificil", 20) / 2), (float)(screenHeight / 2 + 30)}, 20, 0, Fade(BLACK, menuAlpha));
-    DrawTextEx(font, "3. Salir", (Vector2){(float)(screenWidth / 2 - MeasureText("3. Salir", 20) / 2), (float)(screenHeight / 2 + 60)}, 20, 0, Fade(BLACK, menuAlpha));
+    DrawTextEx(font, "Operation Snake", (Vector2){(float)(screenWidth / 2 - MeasureText("Operation Snake", 89) / 2), (float)(screenHeight / 2 - 185)}, 75, 0, BLACK);
+    DrawTextEx(font, "1. Nivel Facil", (Vector2){(float)(screenWidth / 2 - MeasureText("1. Nivel Facil", 40) / 2), (float)(screenHeight / 2 - 30)}, 30, 0, Fade(BLACK, menuAlpha));
+    DrawTextEx(font, "2. Nivel Dificil", (Vector2){(float)(screenWidth / 2 - MeasureText("2. Nivel Dificil", 40) / 2), (float)(screenHeight / 2 + 30)}, 30, 0, Fade(BLACK, menuAlpha));
+    DrawTextEx(font, "3. Salir", (Vector2){(float)(screenWidth / 2 - MeasureText("3. Salir", 45) / 2), (float)(screenHeight / 2 + 90)}, 30, 0, Fade(BLACK, menuAlpha));
 
     EndDrawing();
 }
@@ -604,12 +602,12 @@ void RunCalculatorWindow(void)
 
         // Dibujar la respuesta del usuario
         DrawText("Tu respuesta:", 275, 175, 20, DARKPURPLE);
-        DrawText(TextFormat("%d", calculator.userAnswer), 300, 240, 100, DARKGREEN);
+        DrawText(TextFormat("%d", calculator.userAnswer), 260, 240, 100, DARKGREEN);
 
-        // Dibujar el mensaje de respuesta correcta
-        if (calculator.result)
+        // Dibujar el mensaje de respuesta correcta o incorrecta
+        if (calculator.result != 0)
         {
-            DrawText("¡Respuesta correcta!", 232, 360, 23, DARKPURPLE);
+            DrawText(calculator.result == 1 ? "¡Respuesta correcta!" : "¡Respuesta incorrecta!", 232, 360, 23, DARKPURPLE);
 
             // Cerrar la ventana al desplegar la respuesta
             if (IsKeyPressed(KEY_ENTER))
@@ -618,22 +616,19 @@ void RunCalculatorWindow(void)
                 break;
             }
         }
-        else
-        {
-            if (IsKeyPressed(KEY_ENTER) && calculator.userAnswer != calculator.result)
-            {
-
-                DrawText("¡Respuesta incorrecta!", 232, 360, 23, DARKPURPLE);
-            }
-        }
 
         // Capturar la entrada del usuario
         int key = GetKeyPressed();
         if (key != 0)
         {
-            if (key >= '0' && key <= '9') // Asegurarse de que sea un número
+            if (key >= '0' && key <= '9' && NumTextLength(calculator.userAnswer) < 4) // Asegurarse de que sea un número y no haya más de 4 dígitos
             {
                 calculator.userAnswer = calculator.userAnswer * 10 + (key - '0');
+            }
+            else if (key == KEY_BACKSPACE)
+            {
+                // Eliminar el último dígito si se presiona la tecla de retroceso
+                calculator.userAnswer /= 10;
             }
             else if (key == KEY_ENTER)
             {
@@ -664,6 +659,22 @@ void RunCalculatorWindow(void)
         // Finalizar el dibujo
         EndDrawing();
     }
+}
+
+// Función para calcular la longitud de un número entero
+int NumTextLength(int num)
+{
+    int length = 0;
+    if (num == 0)
+    {
+        return 1;
+    }
+    while (num != 0)
+    {
+        num /= 10;
+        length++;
+    }
+    return length;
 }
 
 // Función para guardar la puntuación en un archivo binario
@@ -702,6 +713,7 @@ void binFileAdd(int newScore)
     fclose(file);
 }
 
+// Función para cargar la puntuación desde el archivo binario
 int loadScore(void)
 {
     FILE *file;
