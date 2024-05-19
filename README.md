@@ -1,4 +1,4 @@
-##Serpent Operation
+Serpent Operation
 
   - El codigo del juego se encuentra en la siguiente ruta "Juego/Graficos/src/juego.cpp"
   - El ejecutable del juego se encuentra en la siguiente ruta "Juego/Graficos/build/Game.exe"
